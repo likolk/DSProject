@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2>Register as a Voter</h2>
+    <h2>heloooooooo this is the register as a voter page.</h2>
     <form @submit.prevent="register">
       <label for="address">Ethereum Address:</label>
       <input v-model="address" type="text" id="address" required />
