@@ -1,6 +1,9 @@
 const express = require("express");
-const Web3 = require("web3");
-const contractABI = require("./build/contracts/VotingContract.json").abi;
+const Web3 = require('web3').default;
+const contractABI = require("./src/contractService").abi;
+const dotenv = require('dotenv')
+dotenv.config();
+const PORT = process.env.PORT || 5000;
 
 const app = express();
 app.use(express.json());
@@ -23,4 +26,4 @@ app.post("/registerVoter", async (req, res) => {
   }
 });
 
-app.listen(3000, () => console.log("Backend running on http://localhost:3000"));
+app.listen(PORT, () => console.log(`Backend running on http://localhost:${PORT}`));

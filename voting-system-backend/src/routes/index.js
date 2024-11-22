@@ -1,10 +1,10 @@
 const express = require('express');
-const { registerShareholder, vote } = require('.././controllers/votingControllers');
+const { registerVoterController, getProposalVotesController } = require('../controllers/votingControllers');
 
 const router = express.Router();
 
-// Endpoints    
-// router.post('/register', registerShareholder);
-// router.post('/vote', vote);
+// Routes
+router.post('/voter/register', registerVoterController);
+router.get('/proposal/:proposalId/votes', getProposalVotesController);
 
 module.exports = router;
