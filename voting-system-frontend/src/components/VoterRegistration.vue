@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2>heloooooooo this is the register as a voter page.</h2>
+    <h2>Register as a Voter</h2>
     <form @submit.prevent="register">
       <label for="address">Ethereum Address:</label>
       <input v-model="address" type="text" id="address" required />
@@ -12,19 +12,22 @@
 </template>
 
 <script>
-import { registerVoter } from "../services/backendService"
+import axios from "axios";
 
 export default {
   data() {
     return {
-      address: '',
-      shares: '',
+      address: "",
+      shares: "",
     };
   },
   methods: {
     async register() {
       try {
-        await registerVoter(this.address, this.shares);
+        await axios.post("http://localhost:8000/registerVoter", {
+          address: this.address,
+          shares: this.shares,
+        });
         alert("Voter registered successfully!");
       } catch (error) {
         console.error("Error registering voter:", error);
