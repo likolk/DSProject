@@ -24,8 +24,8 @@ async function getProposalVotes(proposalId) {
   return votes;
 }
 
-async function createProposal(description) {
-  const tx = await contract.createProposal(description)
+async function createProposal(description, durationInMinutes) {
+  const tx = await contract.createProposal(description, durationInMinutes)
   await tx.wait();
   // transaction hash returnt for tracking
   return tx.hash; 
@@ -53,10 +53,25 @@ async function getUserShares(address) {
   return ethers.BigNumber.from(shares).toString();
 }
 
+async function endVoting(proposalId) {
+  const tx = await contract.endVoting(proposalId);
+  await tx.wait();
+  return tx.hash();
+}
+
+async function updateShares(address, newShares) {
+  const tx = await contract.updateShares(address, newShares);
+  await tx.wait();
+  return tx.hash();
+}
+
 module.exports = { 
   ...require('./contractService'),
   listAllProposals,
   createProposal,
   registerVoter, 
-  getProposalVotes 
+  getProposalVotes ,
+  endVoting,
+  updateShares,
+  getUserShares
 };

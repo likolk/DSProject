@@ -28,9 +28,9 @@ async function getProposalVotesController(req, res) {
 }
 
 async function createProposalController(req, res) {
-  const {description} = req.body;
+  const {description, durationInMinutes} = req.body;
   try {
-    const txHash = await createProposal(description);
+    const txHash = await createProposal(description, durationInMinutes);
     res.status(201).json({
       message:"Successfully created proposl", txHash
     })
@@ -54,11 +54,41 @@ async function listAllProposalsController(req, res) {
   }
 }
 
+async function  endVotingController(req, res) {
+  const {proposalId} = req.params;
+  try {
+    const txHash = await endVoting(proposalId);
+    res.status(200).json({
+      message: "Voting is over", txHash
+    });
+  } catch(error) {
+    console.log("error while ending voting");
+    res.status(500).json({
+      error: "error while failing voting"
+    })
+  }
+}
+
+async function  updateSharesController(req, res) {
+  const {address, newShares} = req.body;
+  try {
+    const txHash = await updateSharesController(address, newShares);
+    res.status(200).json({
+      message: "Shares updated successfully", txHash
+    });
+  } catch (error) {
+    console.error("Error updating shares:", error);
+    res.status(500).json({ error: "Failure updating shares" });
+  }
+}
+
 
 
 module.exports = { 
   registerVoterController, 
   getProposalVotesController,
   listAllProposalsController,
-  createProposalController
+  createProposalController,
+  updateSharesController,
+  endVotingController
  };
