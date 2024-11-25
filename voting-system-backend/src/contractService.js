@@ -47,6 +47,12 @@ async function listAllProposals() {
   return proposals;
 }
 
+// to be used on the frontend if the user has less than 5% of shares
+async function getUserShares(address) {
+  const shares = await contract.shares(address);
+  return ethers.BigNumber.from(shares).toString();
+}
+
 module.exports = { 
   ...require('./contractService'),
   listAllProposals,
