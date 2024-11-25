@@ -1,6 +1,7 @@
 
 // Register shareholder, Submit a vote
 
+const contractService = require('../contractService');
 const {registerVoter, getProposalVotes, listAllProposals, createProposal } = require('../contractService');
 
 
@@ -126,6 +127,24 @@ async function getVotingProgressController(req, res) {
   }
 }
 
+async function checkQuorum(req, res) {
+  const {proposalId} = req.params;
+  try {
+    const quorumMet = await contractService.checkQuorum(proposalId);
+    res.status(200).json({
+      success: true,
+      quorumMet: quorumMet,
+      message: quorumMet ? "Quorum Has Been Met. Voting Ending" : "Quorum not yet met"
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      message: "An error occurred while checking voting quorum."
+    });
+  }
+}
+
 module.exports = { 
   registerVoterController, 
   getProposalVotesController,
@@ -135,5 +154,6 @@ module.exports = {
   endVotingController,
   getTotalShares,
   getRewardBalanceController,
-  getVotingProgressController
+  getVotingProgressController,
+  checkQuorum
  };
