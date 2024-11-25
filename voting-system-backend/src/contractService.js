@@ -65,6 +65,10 @@ async function updateShares(address, newShares) {
   return tx.hash();
 }
 
+async function getTotalShares() {
+  return await contract.totalShares();
+}
+
 module.exports = { 
   ...require('./contractService'),
   listAllProposals,
@@ -73,5 +77,6 @@ module.exports = {
   getProposalVotes ,
   endVoting,
   updateShares,
-  getUserShares
+  getUserShares,
+  getTotalShares,
 };

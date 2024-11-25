@@ -82,6 +82,21 @@ async function  updateSharesController(req, res) {
   }
 }
 
+async function getTotalShares(req, res) {
+  try {
+    const totalShares = await getTotalShares();
+    res.status(200).json({
+      totalShares
+    });
+  } catch(error) {
+    console.log("Eror while fetchign total shares", error);
+    res.status(500).json({
+      error: "Failed whiel fetching total number of sahres."
+    })
+  }
+}
+
+
 
 
 module.exports = { 
@@ -90,5 +105,6 @@ module.exports = {
   listAllProposalsController,
   createProposalController,
   updateSharesController,
-  endVotingController
+  endVotingController,
+  getTotalShares
  };
