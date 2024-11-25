@@ -81,6 +81,11 @@ async function getVotingProgress(proposalId) {
   return progress;
 }
 
+async function checkQuorum(proposalId) {
+  const result = await contract.hasMetQuorum(proposalId);
+  return result;
+}
+
 module.exports = { 
   ...require('./contractService'),
   listAllProposals,
@@ -92,5 +97,6 @@ module.exports = {
   getUserShares,
   getTotalShares,
   getRewardBalance,
-  getVotingProgress
+  getVotingProgress,
+  checkQuorum
 };

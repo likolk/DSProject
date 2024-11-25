@@ -8,7 +8,8 @@ const {
     endVotingController,
     getTotalShares,
     getRewardBalanceController,
-    getVotingProgressController
+    getVotingProgressController,
+    checkQuorum
 
 } = require('../controllers/votingControllers');
 const { route } = require('../app');
@@ -21,6 +22,7 @@ router.get('/proposals', listAllProposalsController);
 router.get('/proposal/:proposalId/votes', getProposalVotesController);
 router.get('/voter/:address/reward', getRewardBalanceController);
 router.get('/proposal/:proposalId/progress', getVotingProgressController)
+router.get('/check-quorum/:proposalId', checkQuorum)
 
 router.post('/voter/register', registerVoterController);
 router.post('/proposal', createProposalController);

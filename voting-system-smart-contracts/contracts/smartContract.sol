@@ -9,19 +9,25 @@ contract VotingContract {
     uint256 public proposalCount;
     uint256 public totalShares; 
 
+    enum QuorumType {SimpleMajority, TwoThirds, ThreeQuarters, Unanimous}
+
     struct Proposal {
         string description;
         uint256 votesFor;
         uint256 votesAgainst;
         bool active;
-        uint256 votingEndTime
+        uint256 votingEndTime;
         uint256 totalVotesCast;
+        // the field below is used for flexible decision thresholds feature (i.e. general, critical, special)
+        QuorumType quorumType;
     }
 
     // is voting active (used to Prevent share transfers from affecting voting power during an active voting period. )
     bool public isVotingPeriodActive; 
     // when voting ends
     uint256 public votingEndTime;
+
+    ERC20 public governanceToken;
 
     event ProposalCreated(uint256 proposalId, string description, uint256 votingEndTime);
     event SharesUpdated(address voter, uint256 newShares);
@@ -40,7 +46,7 @@ contract VotingContract {
         totalShares += shareCount;
     }
 
-    function createProposal(string memory description, uint256 durationInMinutes) public {
+    function createProposal(string memory description, uint256 durationInMinutes, QuorumType quorumType) public {
         uint256 totalShares = 0;
         for (uint256 i = 0; i < proposalCount; i++) {
             totalShares += shares[msg.sender];
@@ -56,8 +62,9 @@ contract VotingContract {
             votesFor: 0,
             votesAgainst: 0,
             active: true,
-            votingEndTime: block.timestamp + durationInMinutes * 1 minutes
-            totalVotesCast = 0
+            votingEndTime: block.timestamp + durationInMinutes * 1 minutes,
+            totalVotesCast: 0,
+            quorumType: quorumType
         });
 
         isVotingPeriodActive = true;
@@ -87,7 +94,11 @@ contract VotingContract {
         uint256 rewardAmount = calculateReward(voteWeight);
         governanceToken.mint(msg.sender, rewardAmount);
 
-        emit VoteCast(proposalId, msg.sender, voteWeight, voteFor)
+        emit VoteCast(proposalId, msg.sender, voteWeight, voteFor);
+
+        if (hasMetQuorum(proposalId)) {
+            endVoting(proposalId);
+        }
     }
 
     function calculateReward(uint256 voteWeight) internal pure returns (uint256) {
@@ -102,7 +113,7 @@ contract VotingContract {
         proposals[proposalId].active = false;
         bool activeProposals = false;
         for (uint256 i = 0; i < proposalCount; i++) {
-            if (proposal[i].active) {
+            if (proposals[i].active) {
                 activeProposals = true;
                 break;
             }
@@ -121,7 +132,33 @@ contract VotingContract {
         Proposal memory proposal = proposals[proposalId];
         uint256 totalVotes = proposal.totalVotesCast;
         uint256 progressPercentage = (totalVotes * 100) / totalShares;
-        requiredQuorum = 50;
-        return (progressPercentage, requiredQuorum)
+        if (proposal.quorumType == QuorumType.SimpleMajority) {
+            requiredQuorum = totalShares / 2;
+        } else if (proposal.quorumType == QuorumType.TwoThirds) {
+            requiredQuorum = (totalShares * 2) / 3;
+        } else if (proposal.quorumType == QuorumType.ThreeQuarters) {
+            requiredQuorum = (totalShares * 3) / 4;
+        } else if (proposal.quorumType == QuorumType.Unanimous) {
+            requiredQuorum = totalShares;
+        }
+        return (progressPercentage, requiredQuorum);
+    }
+
+    function hasMetQuorum(uint256 proposalId) public view returns (bool) {
+        Proposal storage proposal = proposals[proposalId];
+        uint256 totalVotes = proposal.votesFor + proposal.votesAgainst;
+        uint256 quorumThreshold;
+
+        if (proposal.quorumType == QuorumType.SimpleMajority) {
+            quorumThreshold = totalShares / 2;
+        } else if (proposal.quorumType == QuorumType.TwoThirds) {
+            quorumThreshold = (totalShares * 2) / 3; 
+        } else if (proposal.quorumType == QuorumType.ThreeQuarters) {
+            quorumThreshold = (totalShares * 3) / 4;
+        } else if (proposal.quorumType == QuorumType.Unanimous) {
+            quorumThreshold = totalShares;
+        }
+
+        return proposal.votesFor >= quorumThreshold;
     }
 }
