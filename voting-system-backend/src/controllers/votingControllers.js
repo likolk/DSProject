@@ -1,7 +1,7 @@
 
 // Register shareholder, Submit a vote
 
-const { registerVoter, getProposalVotes } = require('../contractService');
+const {registerVoter, getProposalVotes, listAllProposals, createProposal } = require('../contractService');
 
 
 async function registerVoterController(req, res) {
@@ -27,4 +27,38 @@ async function getProposalVotesController(req, res) {
   }
 }
 
-module.exports = { registerVoterController, getProposalVotesController };
+async function createProposalController(req, res) {
+  const {description} = req.body;
+  try {
+    const txHash = await createProposal(description);
+    res.status(201).json({
+      message:"Successfully created proposl", txHash
+    })
+  } catch(error) {
+    console.error("Error while creating porposal", error);
+    res.status(500).json({
+      error: "Failure creating proposal"
+    })
+  }
+}
+
+async function listAllProposalsController(req, res) {
+  try {
+    const proposals = await listAllProposals();
+    res.status(200).json(proposals);
+  } catch(error) {
+    console.error("Erroe while fetching proposals");
+    res.status(500).json({
+      error: "error retrieving proposals"
+    })
+  }
+}
+
+
+
+module.exports = { 
+  registerVoterController, 
+  getProposalVotesController,
+  listAllProposalsController,
+  createProposalController
+ };

@@ -24,4 +24,39 @@ async function getProposalVotes(proposalId) {
   return votes;
 }
 
-module.exports = { registerVoter, getProposalVotes };
+async function createProposal(description) {
+  const tx = await contract.createProposal(description)
+  await tx.wait();
+  // transaction hash returnt for tracking
+  return tx.hash; 
+}
+
+async function listAllProposals() {
+  const proposalCount = await contract.getProposalVotes();
+  const proposals = []
+  for (let i = 0; i < proposalCount; i ++) {
+    const proposal = await contract.proposals(i);
+    proposals.push({
+      id: i,
+      description: proposal.description,
+      votesFor: proposal.votesFor.toString(),
+      votesAgainst: proposal.votesAgainst.toString(),
+      active: proposal.active,
+    });
+  }
+  return proposals;
+}
+
+// to be used on the frontend if the user has less than 5% of shares
+async function getUserShares(address) {
+  const shares = await contract.shares(address);
+  return ethers.BigNumber.from(shares).toString();
+}
+
+module.exports = { 
+  ...require('./contractService'),
+  listAllProposals,
+  createProposal,
+  registerVoter, 
+  getProposalVotes 
+};
