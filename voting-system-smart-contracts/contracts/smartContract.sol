@@ -5,6 +5,7 @@ contract VotingContract {
     mapping(address => uint256) public shares;
     mapping(uint256 => Proposal) public proposals;
     uint256 public proposalCount;
+    uint256 public totalShares; 
 
     struct Proposal {
         string description;
@@ -21,11 +22,14 @@ contract VotingContract {
 
     event ProposalCreated(uint256 proposalId, string description, uint256 votingEndTime);
     event SharesUpdated(address voter, uint256 newShares);
+    // mainly usied for logging
+    event VoteCast(uint256 proposalId, address voter, uint256 weight, bool voteFor);
 
     // register voter along their shares
     function registerVoter(address voter, uint256 shareCount) public {
         require(!isVotingPeriodActive, "Hey its an active voting period, you cannot vote now." );
         shares[voter] = shareCount;
+        totalShares += shareCount;
     }
 
     function createProposal(string memory description, uint256 durationInMinutes) public {
@@ -57,14 +61,19 @@ contract VotingContract {
     function vote(uint256 proposalId, bool voteFor) public {
         require(shares[msg.sender] > 0, "No voting power.");
         require(proposals[proposalId].active, "Proposal inactive.");
-        require(proposals[proposalId].votingEndTime >= block.timestamp.
-        "Voting period has finished.")
+        require(proposals[proposalId].votingEndTime >= block.timestamp,
+        "Voting period has finished.");
+
+        // voting weight calculated basedf on peercentage of shares owned
+        uint256 voteWeight = (shares[msg.sender] * 10000) / totalShares;
         
         if (voteFor) {
-            proposals[proposalId].votesFor += shares[msg.sender];
+            proposals[proposalId].votesFor += voteWeight;
         } else {
-            proposals[proposalId].votesAgainst += shares[msg.sender];
+            proposals[proposalId].votesAgainst += voteWeight;
         }
+
+        emit VoteCast(proposalId, msg.sender, voteWeight, voteFor)
     }
 
     // end a voting period
