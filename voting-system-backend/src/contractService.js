@@ -47,4 +47,10 @@ async function listAllProposals() {
   return proposals;
 }
 
-module.exports = { registerVoter, getProposalVotes };
+module.exports = { 
+  ...require('./contractService'),
+  listAllProposals,
+  createProposal,
+  registerVoter, 
+  getProposalVotes 
+};
