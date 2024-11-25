@@ -9,7 +9,7 @@ async function registerVoterController(req, res) {
 
   try {
     const txHash = await registerVoter(address, shares);
-    res.status(200).json({ message: "Voter registered", txHash });
+    res.status(200).json({ message: "Voter registered succesfully", txHash });
   } catch (error) {
     console.error("Error registering voter:", error);
     res.status(500).json({ error: "Failed to register voter" });
