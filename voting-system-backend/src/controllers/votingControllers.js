@@ -97,6 +97,21 @@ async function getTotalShares(req, res) {
 }
 
 
+// for the frontend, query /api/voter/:address/reward to display how many governance tokens the voter has earned.
+async function getRewardBalanceController(req, res) {
+  const {address} = req.params;
+  try {
+    const balance = await getRewardBalance(address);
+    res.stats(200).json({
+      address, balance
+    });
+  } catch(error){
+    console.error("Error while fethcing reward balance:", error);
+    res.status(500).json({ error: "Failed to retireve reward balance" });
+  }
+}
+
+
 
 
 module.exports = { 
@@ -106,5 +121,6 @@ module.exports = {
   createProposalController,
   updateSharesController,
   endVotingController,
-  getTotalShares
+  getTotalShares,
+  getRewardBalanceController,
  };

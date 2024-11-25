@@ -69,6 +69,12 @@ async function getTotalShares() {
   return await contract.totalShares();
 }
 
+// done after the vote is casted on the blockchain, we can then query the token balances of voters.
+async function getRewardBalance(address) {
+  const balance = await governanceToken.balanceOf(address);
+  return balance;
+}
+
 module.exports = { 
   ...require('./contractService'),
   listAllProposals,
@@ -79,4 +85,5 @@ module.exports = {
   updateShares,
   getUserShares,
   getTotalShares,
+  getRewardBalance,
 };
