@@ -111,8 +111,20 @@ async function getRewardBalanceController(req, res) {
   }
 }
 
-
-
+async function getVotingProgressController(req, res) {
+  const {proposalId} = req.params;
+  try {
+    const progress = await getVotingProgressController(proposalId);
+    res.status(200).json({
+      proposalId,
+      progress: progress[0],
+      quorum: progress[1]
+    })
+  }catch (error) {
+    console.error("Error fetching voting progress:", error);
+    res.status(500).json({ error: "Failed to fetch voting progress" });
+  }
+}
 
 module.exports = { 
   registerVoterController, 
@@ -123,4 +135,5 @@ module.exports = {
   endVotingController,
   getTotalShares,
   getRewardBalanceController,
+  getVotingProgressController
  };

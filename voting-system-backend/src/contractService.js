@@ -75,6 +75,12 @@ async function getRewardBalance(address) {
   return balance;
 }
 
+async function getVotingProgress(proposalId) {
+  const progress = await contract.methods.getVotingProgress(proposalId).call();
+  // we use .call() as it can be used to getch data from the blockcahin without altering anything.
+  return progress;
+}
+
 module.exports = { 
   ...require('./contractService'),
   listAllProposals,
@@ -86,4 +92,5 @@ module.exports = {
   getUserShares,
   getTotalShares,
   getRewardBalance,
+  getVotingProgress
 };

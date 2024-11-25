@@ -15,6 +15,7 @@ contract VotingContract {
         uint256 votesAgainst;
         bool active;
         uint256 votingEndTime
+        uint256 totalVotesCast;
     }
 
     // is voting active (used to Prevent share transfers from affecting voting power during an active voting period. )
@@ -56,6 +57,7 @@ contract VotingContract {
             votesAgainst: 0,
             active: true,
             votingEndTime: block.timestamp + durationInMinutes * 1 minutes
+            totalVotesCast = 0
         });
 
         isVotingPeriodActive = true;
@@ -79,6 +81,8 @@ contract VotingContract {
         } else {
             proposals[proposalId].votesAgainst += voteWeight;
         }
+
+        proposals[proposalId].totalVotesCast += voteWeight
 
         uint256 rewardAmount = calculateReward(voteWeight);
         governanceToken.mint(msg.sender, rewardAmount);
@@ -110,5 +114,14 @@ contract VotingContract {
         require(!isVotingPeriodActive, "cannot update shares during ongoing votong period")
         shares[voter] = newShares;
         emit SharesUpdated(voter, newShares);
+    }
+
+    // real time voting progress
+    function getVotingProgress(uint256 proposalId) public view returns (uint256 progress, uint256 requiredQuorum) {
+        Proposal memory proposal = proposals[proposalId];
+        uint256 totalVotes = proposal.totalVotesCast;
+        uint256 progressPercentage = (totalVotes * 100) / totalShares;
+        requiredQuorum = 50;
+        return (progressPercentage, requiredQuorum)
     }
 }
