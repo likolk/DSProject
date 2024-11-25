@@ -24,4 +24,27 @@ async function getProposalVotes(proposalId) {
   return votes;
 }
 
+async function createProposal(description) {
+  const tx = await contract.createProposal(description)
+  await tx.wait();
+  // transaction hash returnt for tracking
+  return tx.hash; 
+}
+
+async function listAllProposals() {
+  const proposalCount = await contract.getProposalVotes();
+  const proposals = []
+  for (let i = 0; i < proposalCount; i ++) {
+    const proposal = await contract.proposals(i);
+    proposals.push({
+      id: i,
+      description: proposal.description,
+      votesFor: proposal.votesFor.toString(),
+      votesAgainst: proposal.votesAgainst.toString(),
+      active: proposal.active,
+    });
+  }
+  return proposals;
+}
+
 module.exports = { registerVoter, getProposalVotes };
