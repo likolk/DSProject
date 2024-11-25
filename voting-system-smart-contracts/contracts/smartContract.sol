@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
 contract VotingContract {
     mapping(address => uint256) public shares;
     mapping(uint256 => Proposal) public proposals;
@@ -24,8 +26,13 @@ contract VotingContract {
     event SharesUpdated(address voter, uint256 newShares);
     // mainly usied for logging
     event VoteCast(uint256 proposalId, address voter, uint256 weight, bool voteFor);
+    event RewardIssued(address voter, uint256 rewardAmount);
 
-    // register voter along their shares
+    constructor(address _tokenAddress) {
+        governanceToken = GovernanceToken(_tokenAddress);
+    }
+
+    // register voter along their shares (2. Share-Based Registration)
     function registerVoter(address voter, uint256 shareCount) public {
         require(!isVotingPeriodActive, "Hey its an active voting period, you cannot vote now." );
         shares[voter] = shareCount;
@@ -73,7 +80,15 @@ contract VotingContract {
             proposals[proposalId].votesAgainst += voteWeight;
         }
 
+        uint256 rewardAmount = calculateReward(voteWeight);
+        governanceToken.mint(msg.sender, rewardAmount);
+
         emit VoteCast(proposalId, msg.sender, voteWeight, voteFor)
+    }
+
+    function calculateReward(uint256 voteWeight) internal pure returns (uint256) {
+        // we make reward be proportional to the weight of the vote the shareholdefr has. lets say 1 percent
+        return voteWeight / 100;
     }
 
     // end a voting period
