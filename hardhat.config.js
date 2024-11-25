@@ -1,7 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 
 module.exports = {
-  solidity: "0.8.27", // Match the version in your contract
+  solidity: "0.8.27", 
   networks: {
     ganache: {
       url: "http://127.0.0.1:7545",
