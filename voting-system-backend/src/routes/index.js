@@ -7,7 +7,8 @@ const {
     updateSharesController,
     endVotingController,
     getTotalShares,
-    getRewardBalanceController
+    getRewardBalanceController,
+    getVotingProgressController
 
 } = require('../controllers/votingControllers');
 const { route } = require('../app');
@@ -19,6 +20,7 @@ router.get('/shares/total', getTotalShares);
 router.get('/proposals', listAllProposalsController);
 router.get('/proposal/:proposalId/votes', getProposalVotesController);
 router.get('/voter/:address/reward', getRewardBalanceController);
+router.get('/proposal/:proposalId/progress', getVotingProgressController)
 
 router.post('/voter/register', registerVoterController);
 router.post('/proposal', createProposalController);
