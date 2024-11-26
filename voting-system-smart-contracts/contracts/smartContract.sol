@@ -55,7 +55,7 @@ contract VotingContract {
         require(
             shares[msg.sender] * 100 / totalShares >= 5,
             "Sorry you need to have over 5% to create a proposal"
-        )
+        );
 
         proposals[proposalCount] = Proposal({
             description: description,
@@ -89,7 +89,7 @@ contract VotingContract {
             proposals[proposalId].votesAgainst += voteWeight;
         }
 
-        proposals[proposalId].totalVotesCast += voteWeight
+        proposals[proposalId].totalVotesCast += voteWeight;
 
         uint256 rewardAmount = calculateReward(voteWeight);
         governanceToken.mint(msg.sender, rewardAmount);
@@ -122,7 +122,7 @@ contract VotingContract {
     }
 
     function updateShares(address voter, uint256 newShares) public {
-        require(!isVotingPeriodActive, "cannot update shares during ongoing votong period")
+        require(!isVotingPeriodActive, "cannot update shares during ongoing votong period");
         shares[voter] = newShares;
         emit SharesUpdated(voter, newShares);
     }

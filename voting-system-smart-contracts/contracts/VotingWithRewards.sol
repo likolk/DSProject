@@ -9,7 +9,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract GovernanceToken is ERC20 {
-    constructor() ERC20("Governance Token", "GT) {}
+    constructor() ERC20("Governance Token", "GT") {};
     
     // funciton used to issue tokens to shareholders.
     function mint(address to, uint256 amount) public {
