@@ -86,6 +86,7 @@ async function checkQuorum(proposalId) {
   return result;
 }
 
+
 module.exports = { 
   ...require('./contractService'),
   listAllProposals,

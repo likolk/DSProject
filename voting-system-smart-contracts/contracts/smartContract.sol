@@ -7,6 +7,10 @@ import "./VotingWithRewards.sol";
 contract VotingContract {
     mapping(address => uint256) public shares;
     mapping(uint256 => Proposal) public proposals;
+     // track each voter's voting history
+    mapping(address => VotingRecord[]) public votingHistory;
+    // store the outcome of each proposal
+    mapping(uint256 => ProposalOutcome) public proposalOutcomes;
     uint256 public proposalCount;
     uint256 public totalShares;
 
@@ -21,6 +25,18 @@ contract VotingContract {
         uint256 totalVotesCast;
         // the field below is used for flexible decision thresholds feature (i.e. general, critical, special)
         QuorumType quorumType;
+    }
+
+    struct VotingRecord {
+        uint256 proposalId;
+        bool votedFor;
+        uint256 voteWeight;
+    }
+
+    struct ProposalOutcome {
+        bool passed;      
+        uint256 votesFor;   
+        uint256 votesAgainst;
     }
 
     // is voting active (used to Prevent share transfers from affecting voting power during an active voting period. )
@@ -92,6 +108,12 @@ contract VotingContract {
 
         proposals[proposalId].totalVotesCast += voteWeight;
 
+        votingHistory[msg.sender].push(VotingRecord({
+            proposalId: proposalId,
+            votedFor: voteFor,
+            voteWeight: voteWeight
+        }));
+
         uint256 rewardAmount = calculateReward(voteWeight);
         governanceToken.mint(msg.sender, rewardAmount);
 
@@ -119,6 +141,15 @@ contract VotingContract {
                 break;
             }
         }
+
+        bool passed = proposals[proposalId].votesFor > proposals[proposalId].votesAgainst;
+
+        proposalOutcomes[proposalId] = ProposalOutcome({
+            passed: passed,
+            votesFor: proposals[proposalId].votesFor,
+            votesAgainst: proposals[proposalId].votesAgainst
+        });
+
         isVotingPeriodActive = activeProposals;
     }
 
@@ -162,4 +193,9 @@ contract VotingContract {
 
         return proposal.votesFor >= quorumThreshold;
     }
+
+    function getProposalOutcome(uint256 proposalId) public view returns (ProposalOutcome memory) {
+        return proposalOutcomes[proposalId];
+    }
 }
+
