@@ -40,3 +40,10 @@ Role-Based Admin Controls
      Admins: Can oversee and manage voting events.
      Auditors: Can view detailed reports but cannot modify anything.
 
+
+------------------
+
+Issues: Compatibility issue between ethers and ganache. (we will use web3 as an alternative to ethers)
+
+
+TODOs: use web3 to dynamically update address and balances from ganache.
