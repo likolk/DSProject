@@ -6,16 +6,18 @@ pragma solidity ^0.8.20;
 // i created this new file in order to have the token contract that shall issue rewards to
 // shareholders. 
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract GovernanceToken is ERC20 {
-    constructor() ERC20("Governance Token", "GT") {};
-    
-    // funciton used to issue tokens to shareholders.
-    function mint(address to, uint256 amount) public {
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract GovernanceToken is ERC20, Ownable {
+    constructor() ERC20("Governance Token", "GT") Ownable(msg.sender) {}
+
+    function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
     }
 }
+
 
 
 // T.B.D:: This does not work currently as we first need to deploy the GovernanceToken 

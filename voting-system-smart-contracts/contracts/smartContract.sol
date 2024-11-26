@@ -2,12 +2,13 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "./VotingWithRewards.sol";
 
 contract VotingContract {
     mapping(address => uint256) public shares;
     mapping(uint256 => Proposal) public proposals;
     uint256 public proposalCount;
-    uint256 public totalShares; 
+    uint256 public totalShares;
 
     enum QuorumType {SimpleMajority, TwoThirds, ThreeQuarters, Unanimous}
 
@@ -27,7 +28,7 @@ contract VotingContract {
     // when voting ends
     uint256 public votingEndTime;
 
-    ERC20 public governanceToken;
+    GovernanceToken public governanceToken;
 
     event ProposalCreated(uint256 proposalId, string description, uint256 votingEndTime);
     event SharesUpdated(address voter, uint256 newShares);
@@ -36,7 +37,7 @@ contract VotingContract {
     event RewardIssued(address voter, uint256 rewardAmount);
 
     constructor(address _tokenAddress) {
-        governanceToken = GovernanceToken(_tokenAddress);
+        governanceToken = GovernanceToken(_tokenAddress); 
     }
 
     // register voter along their shares (2. Share-Based Registration)
