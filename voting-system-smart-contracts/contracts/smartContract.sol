@@ -97,6 +97,12 @@ contract VotingContract {
         require(proposals[proposalId].votingEndTime >= block.timestamp,
         "Voting period has finished.");
 
+        // prevent double voting
+        for (uint256 i = 0; i < votingHistory[msg.sender].length; i++) {
+            require(votingHistory[msg.sender][i].proposalId != proposalId, "You already voted on this proposal.");
+        }
+
+
         // voting weight calculated basedf on peercentage of shares owned
         uint256 voteWeight = (shares[msg.sender] * 10000) / totalShares;
         
@@ -114,7 +120,10 @@ contract VotingContract {
             voteWeight: voteWeight
         }));
 
+
         uint256 rewardAmount = calculateReward(voteWeight);
+        // ceeck if user already claimed reward.
+        require(governanceToken.balanceOf(msg.sender) == 0, "Rewards already claimed.");
         governanceToken.mint(msg.sender, rewardAmount);
 
         emit VoteCast(proposalId, msg.sender, voteWeight, voteFor);
@@ -149,6 +158,12 @@ contract VotingContract {
             votesFor: proposals[proposalId].votesFor,
             votesAgainst: proposals[proposalId].votesAgainst
         });
+
+        // automatically close proposals that have expired without meeting the quorum.
+        if (block.timestamp > proposals[proposalId].votingEndTime && !hasMetQuorum(proposalId)) {
+            proposals[proposalId].active = false;
+            proposalOutcomes[proposalId] = ProposalOutcome(false, proposals[proposalId].votesFor, proposals[proposalId].votesAgainst);
+        }
 
         isVotingPeriodActive = activeProposals;
     }

@@ -3,6 +3,9 @@
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "hardhat": "^2.22.16"
   },
+  "scripts": {
+    "update-abi": "node update-abi.js"
+  },
   "dependencies": {
     "@openzeppelin/contracts": "^5.1.0",
     "glob": "^7.2.0",
