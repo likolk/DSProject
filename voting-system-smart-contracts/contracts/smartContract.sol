@@ -57,11 +57,10 @@ contract VotingContract {
     }
 
     function createProposal(string memory title, string memory description, uint256 durationInMinutes, QuorumType quorumType) public {
-        require(
-            shares[msg.sender] * 100 / totalShares >= 5,
-            "Sorry, you need to have over 5% to create a proposal"
-        );
-
+        // require(
+        //     shares[msg.sender] * 100 / totalShares >= 5,
+        //     "Sorry, you need to have over 5% to create a proposal"
+        // );
         proposals[proposalCount] = Proposal({
             title: title,
             description: description,
@@ -81,14 +80,14 @@ contract VotingContract {
     }
 
     function vote(uint256 proposalId, bool voteFor) public {
-        require(shares[msg.sender] > 0, "No voting power.");
-        require(proposals[proposalId].active, "Proposal inactive.");
-        require(proposals[proposalId].votingEndTime >= block.timestamp,
-        "Voting period has finished.");
+        // require(shares[msg.sender] > 0, "No voting power.");
+        // require(proposals[proposalId].active, "Proposal inactive.");
+        // require(proposals[proposalId].votingEndTime >= block.timestamp,
+        // "Voting period has finished.");
 
-        for (uint256 i = 0; i < votingHistory[msg.sender].length; i++) {
-            require(votingHistory[msg.sender][i].proposalId != proposalId, "You already voted on this proposal.");
-        }
+        // for (uint256 i = 0; i < votingHistory[msg.sender].length; i++) {
+        //     require(votingHistory[msg.sender][i].proposalId != proposalId, "You already voted on this proposal.");
+        // }
         uint256 voteWeight = (shares[msg.sender] * 10000) / totalShares;
         
         if (voteFor) {
@@ -107,7 +106,7 @@ contract VotingContract {
 
 
         uint256 rewardAmount = calculateReward(voteWeight);
-        require(governanceToken.balanceOf(msg.sender) == 0, "Rewards already claimed.");
+        // require(governanceToken.balanceOf(msg.sender) == 0, "Rewards already claimed.");
         governanceToken.mint(msg.sender, rewardAmount);
 
         emit VoteCast(proposalId, msg.sender, voteWeight, voteFor);
@@ -122,8 +121,8 @@ contract VotingContract {
     }
 
     function endVoting(uint256 proposalId) public {
-        require(proposals[proposalId].active, "Proposal already closed.");
-        require(proposals[proposalId].votingEndTime < block.timestamp, "Voting period still going on");
+        // require(proposals[proposalId].active, "Proposal already closed.");
+        // require(proposals[proposalId].votingEndTime < block.timestamp, "Voting period still going on");
         proposals[proposalId].active = false;
         bool activeProposals = false;
         for (uint256 i = 0; i < proposalCount; i++) {
@@ -150,7 +149,7 @@ contract VotingContract {
     }
 
     function updateShares(address voter, uint256 newShares) public {
-        require(!isVotingPeriodActive, "cannot update shares during ongoing votong period");
+        // require(!isVotingPeriodActive, "cannot update shares during ongoing votong period");
         shares[voter] = newShares;
         emit SharesUpdated(voter, newShares);
     }

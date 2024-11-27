@@ -1,5 +1,5 @@
 import Web3 from "web3";
-import VotingContractABI from "../../../voting-system-smart-contracts/artifacts/contracts/voting.sol/Voting.json";
+import VotingContractABI from "../../../voting-system-smart-contracts/artifacts/contracts/smartContract.sol/VotingContract.json";
 
 console.log("VotingContractABI:", VotingContractABI);  
 
@@ -14,9 +14,11 @@ console.log("VotingContractABI:", VotingContractABI);
 
 export default {
   async createProposal(proposalTitle, proposalDescription, votingDeadline, quorumType) {
+    
     const accounts = await web3.eth.getAccounts();
-    const currentTime = Math.floor(Date.now() / 1000);
-    const votingDuration = Math.floor((new Date(votingDeadline).getTime() / 1000) - currentTime);
+    const votingDeadlineTimestamp = new Date(deadline).getTime() / 1000;
+    const currentTimestamp = Math.floor(Date.now() / 1000); 
+    const votingDuration = votingDeadlineTimestamp - currentTimestamp;
     const quorum = parseInt(quorumType);
 
     try {
