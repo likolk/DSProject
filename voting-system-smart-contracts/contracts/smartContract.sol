@@ -15,6 +15,7 @@ contract VotingContract {
     enum QuorumType {SimpleMajority, TwoThirds, ThreeQuarters, Unanimous}
 
     struct Proposal {
+        string title;
         string description;
         uint256 votesFor;
         uint256 votesAgainst;
@@ -55,13 +56,14 @@ contract VotingContract {
         totalShares += shareCount;
     }
 
-    function createProposal(string memory description, uint256 durationInMinutes, QuorumType quorumType) public {
+    function createProposal(string memory title, string memory description, uint256 durationInMinutes, QuorumType quorumType) public {
         require(
             shares[msg.sender] * 100 / totalShares >= 5,
             "Sorry, you need to have over 5% to create a proposal"
         );
 
         proposals[proposalCount] = Proposal({
+            title: title,
             description: description,
             votesFor: 0,
             votesAgainst: 0,

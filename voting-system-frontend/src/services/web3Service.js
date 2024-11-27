@@ -20,11 +20,11 @@ export default {
     const quorum = parseInt(quorumType);
 
     try {
-      await contract.methods.createProposal(proposalDescription, votingDuration, quorum).send({ from: accounts[0] });
+      await contract.methods.createProposal(proposalTitle, proposalDescription, votingDuration, quorum).send({ from: accounts[0] });
       alert("Proposal Created!");
     } catch (error) {
-      console.error(error);
-      alert("Error creating proposal.");
+      console.error("Error creating proposal:", error);
+      alert(`Error creating proposal: ${error.message || error}`);
     }
   },
 
