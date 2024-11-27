@@ -2,22 +2,22 @@
   <div class="governance-platform">
     <header class="header">
       <nav>
-      <h1>Decentralized Governance Platform</h1>
-      <div class="navbar-menu">
-        <router-link to="/" class="navbar-item active">
-          Dashboard
+        <h1>Decentralized Governance Platform</h1>
+        <div class="navbar-menu">
+          <router-link to="/" class="navbar-item active">
+            Dashboard
+          </router-link>
+          <router-link to="/create-proposal" class="navbar-item">
+            Create Proposal
+          </router-link>
+          <a href="#" class="navbar-item" @click="handleProfile">
+            Profile
+          </a>
+          <router-link to="/voting-history" class="navbar-item">
+        Voting History
         </router-link>
-        <router-link to="/create-proposal" class="navbar-item">
-          Create Proposal
-        </router-link>
-        <a href="#" class="navbar-item" @click="handleProfile">
-          Profile
-        </a>
-        <a href="#" class="navbar-item" @click="handleLogout">
-          Logout
-        </a>
-      </div>
-    </nav>
+        </div>
+      </nav>
     </header>
 
     <div class="container">
@@ -26,9 +26,7 @@
           <h2>Proposal Dashboard</h2>
           <p>Explore and participate in active governance proposals</p>
         </div>
-        <button class="create-btn" @click="navigateToCreateProposal">
-          Create Proposal
-        </button>
+        <button class="create-btn" @click="navigateToCreateProposal">Create Proposal</button>
       </div>
 
       <table class="proposals-table">
@@ -349,7 +347,6 @@ export default {
   color: #9ca3af;
   cursor: not-allowed;
 }
-
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -359,20 +356,11 @@ export default {
   padding: 1rem 2rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-
-.navbar-brand .navbar-logo {
-  color: white;
-  font-size: 1.25rem;
-  font-weight: bold;
-  text-decoration: none;
-}
-
 .navbar-menu {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
-
 .navbar-item {
   color: rgba(255,255,255,0.8);
   text-decoration: none;
@@ -380,14 +368,50 @@ export default {
   border-radius: 0.25rem;
   transition: background-color 0.2s, color 0.2s;
 }
-
 .navbar-item:hover {
   background-color: rgba(255,255,255,0.1);
   color: white;
 }
-
 .navbar-item.active {
   background-color: rgba(255,255,255,0.2);
   color: white;
 }
+
+
+.create-btn,
+.vote-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.create-btn:hover,
+.vote-btn:hover {
+  background-color: #5b21b6;
+}
+
+.vote-btn:disabled {
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Roboto", sans-serif;
+  color: #333;
+}
+
+
 </style>

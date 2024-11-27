@@ -30,9 +30,9 @@
         <a href="#" class="navbar-item" @click="handleProfile">
           Profile
         </a>
-        <a href="#" class="navbar-item" @click="handleLogout">
-          Logout
-        </a>
+        <router-link to="/voting-history" class="navbar-item">
+        Voting History
+        </router-link>
       </div>
     </nav>
 
@@ -178,10 +178,6 @@ const formatDateTime = (dateTime) => {
 // Navigation methods
 const handleProfile = () => {
   alert('Profile functionality not implemented');
-};
-
-const handleLogout = () => {
-  alert('Logout functionality not implemented');
 };
 </script>
 
