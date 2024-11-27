@@ -1,93 +1,53 @@
 <template>
   <nav>
     <div class="navbar-menu">
-        <router-link to="/" class="navbar-item">
-          Dashboard
-        </router-link>
-        <router-link to="/voting-history" class="navbar-item">
+      <router-link to="/" class="navbar-item">
+        Dashboard
+      </router-link>
+      <router-link to="/voting-history" class="navbar-item">
         Voting History
-        </router-link>
-      </div>
+      </router-link>
+    </div>
   </nav>
-  
+
   <div class="governance-app">
-    <!-- Navbar and other UI components -->
     <div class="create-proposal-container">
       <h1 class="title">Create a New Proposal</h1>
       <form @submit.prevent="submitProposal" class="proposal-form">
-        <!-- Form Fields -->
         <div class="form-group">
           <label for="title">Proposal Title</label>
-          <input
-            type="text"
-            id="title"
-            v-model="proposalTitle"
-            required
-            placeholder="Enter proposal title"
-            class="input"
-          />
+          <input type="text" id="title" v-model="proposalTitle" required placeholder="Enter proposal title"
+            class="input" />
         </div>
 
         <div class="form-group">
           <label for="description">Description</label>
-          <textarea
-            id="description"
-            v-model="proposalDescription"
-            required
-            placeholder="Describe your proposal in detail"
-            class="textarea"
-          ></textarea>
+          <textarea id="description" v-model="proposalDescription" required
+            placeholder="Describe your proposal in detail" class="textarea"></textarea>
         </div>
 
         <div class="form-group">
           <label>Voting Options</label>
-          <div
-            v-for="(option, index) in votingOptions"
-            :key="index"
-            class="option-input"
-          >
-            <input
-              type="text"
-              v-model="votingOptions[index]"
-              placeholder="Enter option"
-              class="input"
-            />
-            <button
-              type="button"
-              @click="removeOption(index)"
-              v-if="votingOptions.length > 2"
-              class="remove-option-btn"
-            >
+          <div v-for="(option, index) in votingOptions" :key="index" class="option-input">
+            <input type="text" v-model="votingOptions[index]" placeholder="Enter option" class="input" />
+            <button type="button" @click="removeOption(index)" v-if="votingOptions.length > 2"
+              class="remove-option-btn">
               ✖
             </button>
           </div>
-          <button
-            type="button"
-            @click="addOption"
-            class="add-option-btn"
-          >
+          <button type="button" @click="addOption" class="add-option-btn">
             Add Option +
           </button>
         </div>
 
         <div class="form-group">
           <label for="deadline">Voting Deadline</label>
-          <input
-            type="date"
-            id="deadline"
-            v-model="proposalDeadline"
-            required
-            class="input"
-          />
+          <input type="date" id="deadline" v-model="proposalDeadline" required class="input" />
         </div>
 
         <div class="form-actions">
           <button type="submit" class="submit-btn">Create Proposal</button>
-          <button
-            type="button"
-            class="cancel-btn"
-            @click="cancelProposal"
-          >
+          <button type="button" class="cancel-btn" @click="cancelProposal">
             Cancel
           </button>
         </div>
@@ -97,7 +57,7 @@
 </template>
 
 <script>
-import web3Service from "@/services/web3Service"; 
+import web3Service from "@/services/web3Service";
 export default {
 
   data() {
@@ -130,24 +90,24 @@ export default {
         return;
       }
 
-      console.log("Submitting Proposal:", { 
-    title: this.proposalTitle, 
-    description: this.proposalDescription, 
-    deadline: this.proposalDeadline, 
-    quorumType: this.quorumType 
-  });
-  try {
-    await web3Service.createProposal(
-      this.proposalTitle,
-      this.proposalDescription,
-      this.proposalDeadline,
-      this.quorumType
-    );
-    this.$router.push("/");
-  } catch (error) {
-    console.error('Error during proposal creation:', error);
-    alert(`Error creating proposal: ${error.message || error}`);
-  }
+      console.log("Submitting Proposal:", {
+        title: this.proposalTitle,
+        description: this.proposalDescription,
+        deadline: this.proposalDeadline,
+        quorumType: this.quorumType
+      });
+      try {
+        await web3Service.createProposal(
+          this.proposalTitle,
+          this.proposalDescription,
+          this.proposalDeadline,
+          this.quorumType
+        );
+        this.$router.push("/");
+      } catch (error) {
+        console.error('Error during proposal creation:', error);
+        alert(`Error creating proposal: ${error.message || error}`);
+      }
 
     },
     cancelProposal() {
@@ -210,28 +170,33 @@ export default {
   background-color: #4f46e5;
   color: white;
   padding: 1rem 2rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
 .navbar-menu {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
+
 .navbar-item {
-  color: rgba(255,255,255,0.8);
+  color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   padding: 0.5rem 1rem;
   border-radius: 0.25rem;
   transition: background-color 0.2s, color 0.2s;
 }
+
 .navbar-item:hover {
-  background-color: rgba(255,255,255,0.1);
+  background-color: rgba(255, 255, 255, 0.1);
   color: white;
 }
+
 .navbar-item.active {
-  background-color: rgba(255,255,255,0.2);
+  background-color: rgba(255, 255, 255, 0.2);
   color: white;
 }
+
 .create-proposal-container {
   background: #fff;
   max-width: 700px;
@@ -350,7 +315,7 @@ label {
   background-color: #4f46e5;
   color: white;
   padding: 1rem 2rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-brand .navbar-logo {
@@ -367,7 +332,7 @@ label {
 }
 
 .navbar-item {
-  color: rgba(255,255,255,0.8);
+  color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   padding: 0.5rem 1rem;
   border-radius: 0.25rem;
@@ -375,12 +340,12 @@ label {
 }
 
 .navbar-item:hover {
-  background-color: rgba(255,255,255,0.1);
+  background-color: rgba(255, 255, 255, 0.1);
   color: white;
 }
 
 .navbar-item.active {
-  background-color: rgba(255,255,255,0.2);
+  background-color: rgba(255, 255, 255, 0.2);
   color: white;
 }
 
@@ -394,5 +359,4 @@ body {
   font-family: "Roboto", sans-serif;
   color: #333;
 }
-
 </style>

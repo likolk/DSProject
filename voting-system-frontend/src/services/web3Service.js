@@ -4,9 +4,6 @@ import VotingContractABI from "../../../voting-system-smart-contracts/artifacts/
 console.log("VotingContractABI:", VotingContractABI);  
 
 const web3 = new Web3(Web3.givenProvider || "http://localhost:8545");
-
-console.log("web3:", web3)
-
 const contractAddress = "0x9fD895aF7F241BfAC2a9d3EC4D08ddDaCBc857ab";
 
 
@@ -23,11 +20,11 @@ export default {
     const quorum = parseInt(quorumType);
 
     try {
-      await contract.methods.createProposal(proposalDescription, votingDuration, quorum).send({ from: accounts[0] });
+      await contract.methods.createProposal(proposalTitle, proposalDescription, votingDuration, quorum).send({ from: accounts[0] });
       alert("Proposal Created!");
     } catch (error) {
-      console.error(error);
-      alert("Error creating proposal.");
+      console.error("Error creating proposal:", error);
+      alert(`Error creating proposal: ${error.message || error}`);
     }
   },
 
