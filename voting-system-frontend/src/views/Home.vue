@@ -58,7 +58,7 @@
   .home {
     font-family: 'Arial', sans-serif;
     padding: 20px;
-    background-color: #f4f7fc;
+    background-color: #00eee6;
     display: flex;
     flex-direction: column;
     align-items: center;
