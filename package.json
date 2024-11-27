@@ -1,8 +1,0 @@
-{
-  "devDependencies": {
-    "hardhat": "^2.22.16"
-  },
-  "dependencies": {
-    "vue-router": "^4.4.5"
-  }
-}
