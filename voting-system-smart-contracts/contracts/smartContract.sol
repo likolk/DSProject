@@ -50,17 +50,18 @@ contract VotingContract {
     constructor(address _tokenAddress) {
         governanceToken = GovernanceToken(_tokenAddress); 
     }
-    function registerVoter(address voter, uint256 shareCount) public {
+    function registerShareholder(address voter, uint256 shareCount) public {
         require(!isVotingPeriodActive, "Hey its an active voting period, you cannot vote now." );
         shares[voter] = shareCount;
         totalShares += shareCount;
     }
 
-    function createProposal(string memory title, string memory description, uint256 durationInMinutes, QuorumType quorumType) public {
+    function createProposal(string memory title, string memory description, uint256 durationInMinutes, QuorumType quorumType) public payable {
         // require(
         //     shares[msg.sender] * 100 / totalShares >= 5,
         //     "Sorry, you need to have over 5% to create a proposal"
         // );
+        require(msg.value > 0, "ETH required for creating proposal");
         proposals[proposalCount] = Proposal({
             title: title,
             description: description,
@@ -194,6 +195,8 @@ contract VotingContract {
     function getProposalsCount() public view returns (uint256) {
         return proposalCount;
     }
+    
+
 }
 // contract VotingContract {
 //     mapping(address => uint256) public shares;
