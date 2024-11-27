@@ -76,6 +76,44 @@
         "GovernanceToken"
       ]
     },
+    "/Users/cuenc/Documents/DSProject/voting-system-smart-contracts/node_modules/@openzeppelin/contracts/access/Ownable.sol": {
+      "lastModificationDate": 1732625960188,
+      "contentHash": "d3c790edc9ccf808a17c5a6cd13614fd",
+      "sourceName": "@openzeppelin/contracts/access/Ownable.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../utils/Context.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Ownable"
+      ]
+    },
     "/Users/cuenc/Documents/DSProject/voting-system-smart-contracts/node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol": {
       "lastModificationDate": 1732625960180,
       "contentHash": "38910c3dfa5e3778fac8888b1d714084",
@@ -115,44 +153,6 @@
       ],
       "artifacts": [
         "ERC20"
-      ]
-    },
-    "/Users/cuenc/Documents/DSProject/voting-system-smart-contracts/node_modules/@openzeppelin/contracts/access/Ownable.sol": {
-      "lastModificationDate": 1732625960188,
-      "contentHash": "d3c790edc9ccf808a17c5a6cd13614fd",
-      "sourceName": "@openzeppelin/contracts/access/Ownable.sol",
-      "solcConfig": {
-        "version": "0.8.26",
-        "settings": {
-          "evmVersion": "paris",
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../utils/Context.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "Ownable"
       ]
     },
     "/Users/cuenc/Documents/DSProject/voting-system-smart-contracts/node_modules/@openzeppelin/contracts/utils/Context.sol": {
@@ -304,8 +304,8 @@
       ]
     },
     "/Users/cuenc/Documents/DSProject/voting-system-smart-contracts/contracts/smartContract.sol": {
-      "lastModificationDate": 1732715714733,
-      "contentHash": "7e503729fa7c55d47f5141808b7e08d7",
+      "lastModificationDate": 1732718089813,
+      "contentHash": "34c6a7f05ae1f6ea3ea5f937d64927a1",
       "sourceName": "contracts/smartContract.sol",
       "solcConfig": {
         "version": "0.8.26",
