@@ -50,6 +50,9 @@ Issues: Compatibility issue between ethers and ganache. (we will use web3 as an 
 
 TODOs: use web3 to dynamically update address and balances from ganache.
 
+# DSProject
+DApp Project for Distributed Systems
+
 ## Using Hardhat in the project:
 
 The `deploy.js` script uses Hardhat's ethers library to compile and deploy the Voting contract.  
