@@ -11,8 +11,8 @@
             Create Proposal
           </router-link>
           <router-link to="/voting-history" class="navbar-item">
-        Voting History
-        </router-link>
+            Voting History
+          </router-link>
         </div>
       </nav>
     </header>
@@ -39,53 +39,35 @@
           <tr v-for="proposal in proposals" :key="proposal.id">
             <td>
               <div>
-                <button 
-                  class="proposal-title" 
-                  @click="showProposalDetails(proposal.id)"
-                >
+                <button class="proposal-title" @click="showProposalDetails(proposal.id)">
                   {{ proposal.title }}
                 </button>
-                <span 
-                  class="proposal-status" 
-                  :class="getStatusClasses(proposal.status)"
-                >
+                <span class="proposal-status" :class="getStatusClasses(proposal.status)">
                   {{ capitalizeFirstLetter(proposal.status) }}
                 </span>
                 <p class="text-sm">{{ proposal.description }}</p>
               </div>
             </td>
             <td>
-              <button 
-                v-for="option in proposal.options" 
-                :key="option.id" 
-                class="vote-btn" 
-                @click="showOptionDetails(option.id)"
-              >
+              <button v-for="option in proposal.options" :key="option.id" class="vote-btn"
+                @click="showOptionDetails(option.id)">
                 {{ option.name }}
               </button>
             </td>
             <td>
               <div v-for="option in proposal.options" :key="option.id">
                 <div class="vote-progress">
-                  <div 
-                    class="vote-progress-bar"
-                    :style="{
-                      width: `${(option.votes / totalVotes(proposal)) * 100}%`, 
-                      backgroundColor: '#4f46e5'
-                    }"
-                  ></div>
+                  <div class="vote-progress-bar" :style="{
+                    width: `${(option.votes / totalVotes(proposal)) * 100}%`,
+                    backgroundColor: '#4f46e5'
+                  }"></div>
                 </div>
                 <span>{{ option.votes }} votes</span>
               </div>
             </td>
             <td>
-              <button 
-                v-for="option in proposal.options" 
-                :key="option.id" 
-                class="vote-btn" 
-                @click="vote(proposal.id, option.id)"
-                :disabled="proposal.status !== 'ongoing'"
-              >
+              <button v-for="option in proposal.options" :key="option.id" class="vote-btn"
+                @click="vote(proposal.id, option.id)" :disabled="proposal.status !== 'ongoing'">
                 Vote
               </button>
             </td>
@@ -104,6 +86,8 @@ const contractAddress = '0xc8751Ba127C15dbFddB438CD51737184e6Cfe1c5'
 const web3 = new Web3(window.ethereum);
 await window.ethereum.enable();
 
+console.log("contract abi.abi:", contractABI.abi); 
+
 export default {
   data() {
     return {
@@ -113,31 +97,33 @@ export default {
 
   mounted() {
     this.fetchProposals();
-},
+  },
   methods: {
     async fetchProposals() {
-  console.log("Fetching proposals...");
-  const contract = new web3.eth.Contract(contractABI.abi, contractAddress);
-  console.log("Contract:", contract);
-  try {
-    const proposalsCount = await contract.methods.getProposalsCount().call();
-    console.log("Proposals Count:", proposalsCount);
-    for (let i = 0; i < proposalsCount; i++) {
-      const proposal = await contract.methods.getProposal(i).call();
-      console.log("Fetched Proposal:", proposal);
-    }
-  } catch (error) {
-    console.error("Error fetching proposals:", error);
-    console.error("Contract ABI:", contractABI);
-    console.error("Contract Address:", contractAddress);
-  }
-},
+      console.log("Fetching proposals...");
+      const contract = new web3.eth.Contract(contractABI.abi, contractAddress);
+      console.log("Contract:", contract);
+
+      try {
+        const proposalsCount = await contract.methods.getProposalsCount().call();
+        console.log("Proposals Count:", proposalsCount);
+        for (let i = 0; i < proposalsCount; i++) {
+          const proposal = await contract.methods.getProposal(i).call();
+          console.log("Fetched Proposal:", proposal);
+        }
+
+      } catch (error) {
+        console.error("Error fetching proposals:", error);
+        console.error("Contract ABI:", contractABI);
+        console.error("Contract Address:", contractAddress);
+      }
+    },
 
     navigateToCreateProposal() {
-    // Use Vue Router to programmatically navigate
-    this.$router.push('/create-proposal')
-  },
-  handleProfile() {
+      // Use Vue Router to programmatically navigate
+      this.$router.push('/create-proposal')
+    },
+    handleProfile() {
       this.$router.push("/profile");
     },
     getStatusClasses(status) {
@@ -188,7 +174,7 @@ export default {
       if (this.totalVotes(randomProposal) > 200 && randomProposal.status === 'ongoing') {
         randomProposal.status = 'ended'
 
-        const approvedOption = randomProposal.options.reduce((prev, current) => 
+        const approvedOption = randomProposal.options.reduce((prev, current) =>
           prev.votes > current.votes ? prev : current
         )
 
@@ -306,10 +292,25 @@ export default {
   font-size: 0.75rem;
 }
 
-.status-ongoing { background-color: #ecfccb; color: #3f6212; }
-.status-ended { background-color: #f3f4f6; color: #4b5563; }
-.status-approved { background-color: #dbeafe; color: #1e40af; }
-.status-rejected { background-color: #fee2e2; color: #991b1b; }
+.status-ongoing {
+  background-color: #ecfccb;
+  color: #3f6212;
+}
+
+.status-ended {
+  background-color: #f3f4f6;
+  color: #4b5563;
+}
+
+.status-approved {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.status-rejected {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
 
 .vote-progress {
   width: 100%;
@@ -340,6 +341,7 @@ export default {
   color: #9ca3af;
   cursor: not-allowed;
 }
+
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -347,26 +349,30 @@ export default {
   background-color: #4f46e5;
   color: white;
   padding: 1rem 2rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
 .navbar-menu {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
+
 .navbar-item {
-  color: rgba(255,255,255,0.8);
+  color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   padding: 0.5rem 1rem;
   border-radius: 0.25rem;
   transition: background-color 0.2s, color 0.2s;
 }
+
 .navbar-item:hover {
-  background-color: rgba(255,255,255,0.1);
+  background-color: rgba(255, 255, 255, 0.1);
   color: white;
 }
+
 .navbar-item.active {
-  background-color: rgba(255,255,255,0.2);
+  background-color: rgba(255, 255, 255, 0.2);
   color: white;
 }
 
@@ -405,6 +411,4 @@ body {
   font-family: "Roboto", sans-serif;
   color: #333;
 }
-
-
 </style>

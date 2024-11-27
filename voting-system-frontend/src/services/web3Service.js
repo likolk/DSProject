@@ -4,9 +4,6 @@ import VotingContractABI from "../../../voting-system-smart-contracts/artifacts/
 console.log("VotingContractABI:", VotingContractABI);  
 
 const web3 = new Web3(Web3.givenProvider || "http://localhost:8545");
-
-console.log("web3:", web3)
-
 const contractAddress = "0x9fD895aF7F241BfAC2a9d3EC4D08ddDaCBc857ab";
 
 

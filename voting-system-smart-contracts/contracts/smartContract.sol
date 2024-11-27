@@ -7,9 +7,7 @@ import "./VotingWithRewards.sol";
 contract VotingContract {
     mapping(address => uint256) public shares;
     mapping(uint256 => Proposal) public proposals;
-     // track each voter's voting history
     mapping(address => VotingRecord[]) public votingHistory;
-    // store the outcome of each proposal
     mapping(uint256 => ProposalOutcome) public proposalOutcomes;
     uint256 public proposalCount;
     uint256 public totalShares;
@@ -23,7 +21,6 @@ contract VotingContract {
         bool active;
         uint256 votingEndTime;
         uint256 totalVotesCast;
-        // the field below is used for flexible decision thresholds feature (i.e. general, critical, special)
         QuorumType quorumType;
     }
 
@@ -39,24 +36,19 @@ contract VotingContract {
         uint256 votesAgainst;
     }
 
-    // is voting active (used to Prevent share transfers from affecting voting power during an active voting period. )
     bool public isVotingPeriodActive; 
-    // when voting ends
     uint256 public votingEndTime;
 
     GovernanceToken public governanceToken;
 
     event ProposalCreated(uint256 proposalId, string description, uint256 votingEndTime);
     event SharesUpdated(address voter, uint256 newShares);
-    // mainly usied for logging
     event VoteCast(uint256 proposalId, address voter, uint256 weight, bool voteFor);
     event RewardIssued(address voter, uint256 rewardAmount);
 
     constructor(address _tokenAddress) {
         governanceToken = GovernanceToken(_tokenAddress); 
     }
-
-    // register voter along their shares (2. Share-Based Registration)
     function registerVoter(address voter, uint256 shareCount) public {
         require(!isVotingPeriodActive, "Hey its an active voting period, you cannot vote now." );
         shares[voter] = shareCount;
@@ -92,13 +84,9 @@ contract VotingContract {
         require(proposals[proposalId].votingEndTime >= block.timestamp,
         "Voting period has finished.");
 
-        // prevent double voting
         for (uint256 i = 0; i < votingHistory[msg.sender].length; i++) {
             require(votingHistory[msg.sender][i].proposalId != proposalId, "You already voted on this proposal.");
         }
-
-
-        // voting weight calculated basedf on peercentage of shares owned
         uint256 voteWeight = (shares[msg.sender] * 10000) / totalShares;
         
         if (voteFor) {
@@ -117,7 +105,6 @@ contract VotingContract {
 
 
         uint256 rewardAmount = calculateReward(voteWeight);
-        // ceeck if user already claimed reward.
         require(governanceToken.balanceOf(msg.sender) == 0, "Rewards already claimed.");
         governanceToken.mint(msg.sender, rewardAmount);
 
@@ -129,11 +116,9 @@ contract VotingContract {
     }
 
     function calculateReward(uint256 voteWeight) internal pure returns (uint256) {
-        // we make reward be proportional to the weight of the vote the shareholdefr has. lets say 1 percent
         return voteWeight / 100;
     }
 
-    // end a voting period
     function endVoting(uint256 proposalId) public {
         require(proposals[proposalId].active, "Proposal already closed.");
         require(proposals[proposalId].votingEndTime < block.timestamp, "Voting period still going on");
@@ -154,7 +139,6 @@ contract VotingContract {
             votesAgainst: proposals[proposalId].votesAgainst
         });
 
-        // automatically close proposals that have expired without meeting the quorum.
         if (block.timestamp > proposals[proposalId].votingEndTime && !hasMetQuorum(proposalId)) {
             proposals[proposalId].active = false;
             proposalOutcomes[proposalId] = ProposalOutcome(false, proposals[proposalId].votesFor, proposals[proposalId].votesAgainst);
@@ -169,7 +153,6 @@ contract VotingContract {
         emit SharesUpdated(voter, newShares);
     }
 
-    // real time voting progress
     function getVotingProgress(uint256 proposalId) public view returns (uint256 progress, uint256 requiredQuorum) {
         Proposal memory proposal = proposals[proposalId];
         uint256 totalVotes = proposal.totalVotesCast;
@@ -188,7 +171,6 @@ contract VotingContract {
 
     function hasMetQuorum(uint256 proposalId) public view returns (bool) {
         Proposal storage proposal = proposals[proposalId];
-        // uint256 totalVotes = proposal.votesFor + proposal.votesAgainst;
         uint256 quorumThreshold;
 
         if (proposal.quorumType == QuorumType.SimpleMajority) {
