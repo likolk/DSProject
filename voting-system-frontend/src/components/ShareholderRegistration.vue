@@ -32,26 +32,28 @@
             this.errorMessage = "Please connect your Ethereum wallet.";
           }
         } else {
-          this.errorMessage = "Ethereum wallet not found.";
+          alert("Ethereum wallet not found.");
         }
       },
       async registerShareholder() {
-        if (!this.shares || this.shares <= 0) {
-          this.errorMessage = "Please enter a valid number of shares.";
-          return;
-        }
-        const provider = new Web3(window.ethereum);
-        const signer = provider.getSigner();
-        const shareholderAddress = await signer.getAddress();
-        const contract = this.getVotingContract(signer);
-  
-        try {
-          await contract.registerShareholder(shareholderAddress, this.shares);
-          alert("Registration successful!");
-        } catch (err) {
-          this.errorMessage = "Registration failed.";
-        }
-      },
+            if (!this.shares || this.shares <= 0) {
+                this.errorMessage = "Please enter a valid number of shares.";
+                return;
+            }
+
+            if (!this.accounts.length) {
+                this.errorMessage = "Please connect your wallet first.";
+                return;
+            }
+
+            try {
+                const shareholderAddress = this.accounts[0];
+                const tx = await this.contract.methods.registerShareholder(shareholderAddress, this.shares).send({ from: shareholderAddress });
+                alert("Registration successful!");
+            } catch (err) {
+                this.errorMessage = "Registration failed.";
+            }
+        },
       getVotingContract(signer) {
         const contractAddress = "0x71f13461195DaB07902cac189572a3d44d949253";
         const contractABI = [];
