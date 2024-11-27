@@ -1,425 +1,333 @@
-<!-- views/HomeView.vue -->
 <template>
-  <Layout>
-    <template #header>
-      <h1 class="text-3xl font-bold tracking-tight text-white">Our Dapp</h1>
-    </template>
+  <div class="governance-platform">
+    <header class="header">
+      <h1>Decentralized Governance Platform</h1>
+    </header>
 
-    <div class="px-4 sm:px-6 lg:px-8 pt-6">
-      <div class="sm:flex sm:items-center">
-        <div class="sm:flex-auto">
-          <h1 class="text-base font-semibold text-gray-900">Proposal List</h1>
-          <p class="mt-2 text-sm text-gray-700">
-            A list of all current proposals and their status.
-          </p>
+    <div class="container">
+      <div class="dashboard-header">
+        <div class="dashboard-title">
+          <h2>Proposal Dashboard</h2>
+          <p>Explore and participate in active governance proposals</p>
         </div>
-        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <button
-            @click="$router.push('/create-proposal')"
-            type="button"
-            class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
-          >
-            Create Proposal
-          </button>
-        </div>
+        <button class="create-btn" @click="navigateToCreateProposal">
+          Create Proposal
+        </button>
       </div>
 
-      <div class="mt-8 flow-root">
-        <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-          <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <table class="min-w-full divide-y divide-gray-300">
-              <thead>
-                <tr>
-                  <th
-                    class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0"
-                  >
-                    Proposal
-                  </th>
-                  <th
-                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    Options
-                  </th>
-                  <th
-                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    Voting Results
-                  </th>
-                  <th
-                    class="relative py-3.5 pl-3 pr-4 sm:pr-0"
-                  >
-                    <span class="sr-only">Vote</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200 bg-white">
-                <tr v-for="proposal in proposals" :key="proposal.id">
-                  <td
-                    class="whitespace-nowrap py-5 pl-4 pr-3 text-sm sm:pl-0"
-                  >
-                    <div class="text-gray-900 font-medium flex items-center">
-                      <button
-                        @click="showProposalDetails(proposal)"
-                        class="text-left text-blue-600 hover:text-blue-900 underline"
-                      >
-                        {{ proposal.title }}
-                      </button>
-                      <span
-                        class="ml-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
-                        :class="statusClasses(proposal.status)"
-                      >
-                        {{ statusText(proposal.status) }}
-                      </span>
-                    </div>
-                    <div class="mt-1 text-gray-500">
-                      {{ proposal.description }}
-                    </div>
-                  </td>
-                  <td
-                    class="whitespace-nowrap px-3 py-5 text-sm text-gray-500"
-                  >
-                    <ul>
-                      <li
-                        v-for="option in proposal.options"
-                        :key="option.id"
-                        class="mb-2"
-                      >
-                        <button
-                          @click="showOptionDetails(option)"
-                          class="text-blue-600 hover:text-blue-900 underline"
-                        >
-                          {{ option.name }}
-                        </button>
-                      </li>
-                    </ul>
-                  </td>
-                  <td
-                    class="whitespace-nowrap px-3 py-5 text-sm text-gray-500"
-                  >
-                    <ul>
-                      <li
-                        v-for="option in proposal.options"
-                        :key="option.id"
-                        class="mb-4"
-                      >
-                        {{ option.votes }} votes
-                        <div class="w-full bg-gray-200 rounded-full h-2.5 mt-1">
-                          <div
-                            class="bg-blue-600 h-2.5 rounded-full"
-                            :style="{
-                              width:
-                                (option.votes / totalVotes(proposal)) * 100 +
-                                '%',
-                            }"
-                          ></div>
-                        </div>
-                      </li>
-                    </ul>
-                  </td>
-                  <td
-                    class="relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0"
-                  >
-                    <ul>
-                      <li
-                        v-for="option in proposal.options"
-                        :key="option.id"
-                        class="mb-2"
-                      >
-                        <button
-                          @click="vote(proposal, option)"
-                          class="text-indigo-600 hover:text-indigo-900"
-                          :disabled="proposal.status !== 'ongoing'"
-                        >
-                          Vote
-                        </button>
-                      </li>
-                    </ul>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- Option Details Modal -->
-      <div v-if="isOptionModalOpen" class="fixed z-10 inset-0 overflow-y-auto">
-        <div
-          class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
-        >
-          <div
-            class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-            aria-hidden="true"
-          ></div>
-
-          <!-- This element is to trick the browser into centering the modal contents. -->
-          <span
-            class="hidden sm:inline-block sm:align-middle sm:h-screen"
-            aria-hidden="true"
-            >&#8203;</span
-          >
-
-          <div
-            class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="modal-headline"
-          >
-            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-              <h3
-                class="text-lg leading-6 font-medium text-gray-900"
-                id="modal-headline"
-              >
-                {{ selectedOption.name }}
-              </h3>
-              <div class="mt-2">
-                <p class="text-sm text-gray-500">
-                  {{ selectedOption.details }}
-                </p>
+      <table class="proposals-table">
+        <thead>
+          <tr>
+            <th>Proposal Details</th>
+            <th>Voting Options</th>
+            <th>Voting Results</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="proposal in proposals" :key="proposal.id">
+            <td>
+              <div>
+                <button 
+                  class="proposal-title" 
+                  @click="showProposalDetails(proposal.id)"
+                >
+                  {{ proposal.title }}
+                </button>
+                <span 
+                  class="proposal-status" 
+                  :class="getStatusClasses(proposal.status)"
+                >
+                  {{ capitalizeFirstLetter(proposal.status) }}
+                </span>
+                <p class="text-sm">{{ proposal.description }}</p>
               </div>
-            </div>
-            <div
-              class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
-            >
-              <button
-                @click="isOptionModalOpen = false"
-                type="button"
-                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+            </td>
+            <td>
+              <button 
+                v-for="option in proposal.options" 
+                :key="option.id" 
+                class="vote-btn" 
+                @click="showOptionDetails(option.id)"
               >
-                Close
+                {{ option.name }}
               </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Proposal Details Modal -->
-      <div v-if="isProposalModalOpen" class="fixed z-10 inset-0 overflow-y-auto">
-        <div
-          class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
-        >
-          <div
-            class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-            aria-hidden="true"
-          ></div>
-
-          <!-- This element is to trick the browser into centering the modal contents. -->
-          <span
-            class="hidden sm:inline-block sm:align-middle sm:h-screen"
-            aria-hidden="true"
-            >&#8203;</span
-          >
-
-          <div
-            class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="proposal-modal-headline"
-          >
-            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-              <h3
-                class="text-lg leading-6 font-medium text-gray-900"
-                id="proposal-modal-headline"
-              >
-                {{ selectedProposal.title }}
-              </h3>
-              <div class="mt-2">
-                <p class="text-sm text-gray-500">
-                  {{ selectedProposal.description }}
-                </p>
-                <p class="mt-2 text-sm text-gray-500">
-                  <strong>Creation Date:</strong> {{ selectedProposal.creationDate }}
-                </p>
-                <p class="mt-1 text-sm text-gray-500">
-                  <strong>Deadline:</strong> {{ selectedProposal.deadline }}
-                </p>
+            </td>
+            <td>
+              <div v-for="option in proposal.options" :key="option.id">
+                <div class="vote-progress">
+                  <div 
+                    class="vote-progress-bar"
+                    :style="{
+                      width: `${(option.votes / totalVotes(proposal)) * 100}%`, 
+                      backgroundColor: '#4f46e5'
+                    }"
+                  ></div>
+                </div>
+                <span>{{ option.votes }} votes</span>
               </div>
-            </div>
-            <div
-              class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
-            >
-              <button
-                @click="isProposalModalOpen = false"
-                type="button"
-                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+            </td>
+            <td>
+              <button 
+                v-for="option in proposal.options" 
+                :key="option.id" 
+                class="vote-btn" 
+                @click="vote(proposal.id, option.id)"
+                :disabled="proposal.status !== 'ongoing'"
               >
-                Close
+                Vote
               </button>
-            </div>
-          </div>
-        </div>
-      </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-  </Layout>
+  </div>
 </template>
 
-<script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
-import { useRouter } from 'vue-router';
-import Layout from '../components/Layout.vue';
-
-const router = useRouter();
-
-const proposals = ref([]);
-
-// Initial proposal data
-const initialProposals = [
-  {
-    id: 1,
-    title: 'Investment Strategy Selection',
-    description: 'Please choose the investment portfolio you think is most suitable.',
-    status: 'ongoing',
-    creationDate: '2023-09-01',
-    deadline: '2023-09-30',
-    options: [
-      {
-        id: 1,
-        name: 'Stocks',
-        votes: 50,
-        details: 'Stocks are securities representing ownership in a company.',
-      },
-      {
-        id: 2,
-        name: 'Bonds',
-        votes: 30,
-        details: 'Bonds are debt securities issued by companies or governments.',
-      },
-      {
-        id: 3,
-        name: 'Mixed Funds',
-        votes: 20,
-        details: 'Mixed funds invest in a combination of stocks and bonds.',
-      },
-    ],
-    userVotingWeight: 5, // User's voting weight
-  },
-  {
-    id: 2,
-    title: 'Company Strategy Adjustment',
-    description: 'Please choose the future development direction of the company.',
-    status: 'ongoing',
-    creationDate: '2023-08-15',
-    deadline: '2023-09-15',
-    options: [
-      {
-        id: 4,
-        name: 'Expand Overseas Markets',
-        votes: 40,
-        details: 'Expanding overseas markets helps the company globalize.',
-      },
-      {
-        id: 5,
-        name: 'Focus on Domestic Business',
-        votes: 60,
-        details: 'Focusing on domestic business can consolidate the existing market.',
-      },
-    ],
-    userVotingWeight: 1,
-  },
-  // You can continue to add more proposals
-];
-
-const isOptionModalOpen = ref(false);
-const selectedOption = ref({});
-
-const isProposalModalOpen = ref(false);
-const selectedProposal = ref({});
-
-const showOptionDetails = (option) => {
-  selectedOption.value = option;
-  isOptionModalOpen.value = true;
-};
-
-const showProposalDetails = (proposal) => {
-  selectedProposal.value = proposal;
-  isProposalModalOpen.value = true;
-};
-
-const vote = (proposal, option) => {
-  if (proposal.status !== 'ongoing') {
-    alert('This proposal has ended and cannot be voted on.');
-    return;
-  }
-
-  // Increase the vote count of the option
-  option.votes += proposal.userVotingWeight;
-
-  // Update the proposals data in localStorage
-  localStorage.setItem('proposals', JSON.stringify(proposals.value));
-};
-
-const totalVotes = (proposal) => {
-  return proposal.options.reduce((sum, option) => sum + option.votes, 0);
-};
-
-const statusClasses = (status) => {
-  switch (status) {
-    case 'ongoing':
-      return 'bg-green-100 text-green-800';
-    case 'ended':
-      return 'bg-gray-100 text-gray-800';
-    case 'approved':
-      return 'bg-blue-100 text-blue-800';
-    case 'rejected':
-      return 'bg-red-100 text-red-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-};
-
-const statusText = (status) => {
-  switch (status) {
-    case 'ongoing':
-      return 'Ongoing';
-    case 'ended':
-      return 'Ended';
-    case 'approved':
-      return 'Approved';
-    case 'rejected':
-      return 'Rejected';
-    default:
-      return 'Unknown Status';
-  }
-};
-
-let intervalId;
-
-onMounted(() => {
-  const storedProposals = JSON.parse(localStorage.getItem('proposals') || '[]');
-  if (storedProposals.length > 0) {
-    proposals.value = storedProposals;
-  } else {
-    proposals.value = initialProposals;
-    localStorage.setItem('proposals', JSON.stringify(initialProposals));
-  }
-
-  intervalId = setInterval(() => {
-    // Simulate other users voting
-    const randomProposal = proposals.value[Math.floor(Math.random() * proposals.value.length)];
-    const randomOption = randomProposal.options[Math.floor(Math.random() * randomProposal.options.length)];
-
-    // Increase random votes
-    randomOption.votes += Math.floor(Math.random() * 5);
-
-    // Update proposal status
-    if (totalVotes(randomProposal) > 200 && randomProposal.status === 'ongoing') {
-      randomProposal.status = 'ended';
-
-      // Decide approval or rejection based on voting results
-      const approvedOption = randomProposal.options.reduce((prev, current) => (prev.votes > current.votes ? prev : current));
-      if (approvedOption.name === 'Stocks') {
-        randomProposal.status = 'approved';
-      } else {
-        randomProposal.status = 'rejected';
-      }
+<script>
+export default {
+  data() {
+    return {
+      proposals: [],
+      initialProposals: [
+        {
+          id: 1,
+          title: 'Investment Strategy Selection',
+          description: 'Please choose the investment portfolio you think is most suitable.',
+          status: 'ongoing',
+          creationDate: '2023-09-01',
+          deadline: '2023-09-30',
+          options: [
+            { id: 1, name: 'Stocks', votes: 50, details: 'Stocks are securities representing ownership in a company.' },
+            { id: 2, name: 'Bonds', votes: 30, details: 'Bonds are debt securities issued by companies or governments.' },
+            { id: 3, name: 'Mixed Funds', votes: 20, details: 'Mixed funds invest in a combination of stocks and bonds.' }
+          ],
+          userVotingWeight: 5
+        },
+        {
+          id: 2,
+          title: 'Company Strategy Adjustment',
+          description: 'Please choose the future development direction of the company.',
+          status: 'ongoing',
+          creationDate: '2023-08-15',
+          deadline: '2023-09-15',
+          options: [
+            { id: 4, name: 'Expand Overseas Markets', votes: 40, details: 'Expanding overseas markets helps the company globalize.' },
+            { id: 5, name: 'Focus on Domestic Business', votes: 60, details: 'Focusing on domestic business can consolidate the existing market.' }
+          ],
+          userVotingWeight: 1
+        }
+      ]
     }
+  },
+  methods: {
+    navigateToCreateProposal() {
+    // Use Vue Router to programmatically navigate
+    this.$router.push('/create-proposal')
+  },
+    getStatusClasses(status) {
+      const statusMap = {
+        'ongoing': 'status-ongoing',
+        'ended': 'status-ended',
+        'approved': 'status-approved',
+        'rejected': 'status-rejected'
+      }
+      return statusMap[status] || 'status-ended'
+    },
+    totalVotes(proposal) {
+      return proposal.options.reduce((sum, option) => sum + option.votes, 0)
+    },
+    vote(proposalId, optionId) {
+      const proposal = this.proposals.find(p => p.id === proposalId)
+      const option = proposal.options.find(o => o.id === optionId)
 
-    // Update the proposals data in localStorage
-    localStorage.setItem('proposals', JSON.stringify(proposals.value));
-  }, 5000); // Simulate every 5 seconds
-});
+      if (proposal.status !== 'ongoing') {
+        alert('This proposal has ended and cannot be voted on.')
+        return
+      }
 
-onBeforeUnmount(() => {
-  clearInterval(intervalId);
-});
+      option.votes += proposal.userVotingWeight
+      this.saveProposals()
+    },
+    showProposalDetails(proposalId) {
+      const proposal = this.proposals.find(p => p.id === proposalId)
+      alert(`Proposal: ${proposal.title}\nDescription: ${proposal.description}\nCreation Date: ${proposal.creationDate}\nDeadline: ${proposal.deadline}`)
+    },
+    showOptionDetails(optionId) {
+      let optionDetails
+      this.proposals.forEach(proposal => {
+        const option = proposal.options.find(o => o.id === optionId)
+        if (option) optionDetails = option.details
+      })
+      alert(optionDetails)
+    },
+    capitalizeFirstLetter(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1)
+    },
+    simulateVoting() {
+      const randomProposal = this.proposals[Math.floor(Math.random() * this.proposals.length)]
+      const randomOption = randomProposal.options[Math.floor(Math.random() * randomProposal.options.length)]
+
+      randomOption.votes += Math.floor(Math.random() * 5)
+
+      if (this.totalVotes(randomProposal) > 200 && randomProposal.status === 'ongoing') {
+        randomProposal.status = 'ended'
+
+        const approvedOption = randomProposal.options.reduce((prev, current) => 
+          prev.votes > current.votes ? prev : current
+        )
+
+        randomProposal.status = approvedOption.name === 'Stocks' ? 'approved' : 'rejected'
+      }
+
+      this.saveProposals()
+    },
+    saveProposals() {
+      localStorage.setItem('proposals', JSON.stringify(this.proposals))
+    },
+    initProposals() {
+      const storedProposals = JSON.parse(localStorage.getItem('proposals') || '[]')
+      this.proposals = storedProposals.length > 0 ? storedProposals : this.initialProposals
+      this.saveProposals()
+    }
+  },
+  mounted() {
+    this.initProposals()
+    setInterval(this.simulateVoting, 5000)
+  }
+}
 </script>
+
+<style scoped>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.governance-platform {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  line-height: 1.6;
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+.header {
+  background: linear-gradient(to right, #4f46e5, #7c3aed);
+  color: white;
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.header h1 {
+  font-size: 2.25rem;
+  font-weight: 800;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.dashboard-title h2 {
+  font-size: 1.5rem;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-title p {
+  color: #6b7280;
+}
+
+.create-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.create-btn:hover {
+  background-color: #5b21b6;
+}
+
+.proposals-table {
+  width: 100%;
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.proposals-table thead {
+  background-color: #f9fafb;
+}
+
+.proposals-table th,
+.proposals-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.proposal-title {
+  color: #4f46e5;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.proposal-status {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+}
+
+.status-ongoing { background-color: #ecfccb; color: #3f6212; }
+.status-ended { background-color: #f3f4f6; color: #4b5563; }
+.status-approved { background-color: #dbeafe; color: #1e40af; }
+.status-rejected { background-color: #fee2e2; color: #991b1b; }
+
+.vote-progress {
+  width: 100%;
+  background-color: #e5e7eb;
+  border-radius: 9999px;
+  height: 0.625rem;
+  margin-top: 0.25rem;
+}
+
+.vote-progress-bar {
+  height: 100%;
+  border-radius: 9999px;
+}
+
+.vote-btn {
+  background: none;
+  border: none;
+  color: #4f46e5;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.vote-btn:hover {
+  color: #5b21b6;
+}
+
+.vote-btn:disabled {
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+</style>

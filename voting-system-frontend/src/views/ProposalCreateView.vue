@@ -1,168 +1,220 @@
-<!-- views/ProposalCreateView.vue -->
 <template>
-  <Layout>
-    <template #header>
-      <h1 class="text-3xl font-bold tracking-tight text-white">Create New Proposal</h1>
-    </template>
+  <div class="create-proposal-container">
+    <h1>Create New Proposal</h1>
+    <form @submit.prevent="submitProposal">
+      <div class="form-group">
+        <label for="title">Proposal Title</label>
+        <input 
+          type="text" 
+          id="title" 
+          v-model="proposalTitle" 
+          required 
+          placeholder="Enter proposal title"
+        >
+      </div>
 
-    <div class="bg-white p-6 rounded-lg shadow">
-      <form @submit.prevent="handleSubmit">
-        <div class="mb-4">
-          <label class="block text-gray-700">Proposal Title</label>
-          <input
-            v-model="proposalName"
-            type="text"
-            class="mt-1 block w-full border border-gray-300 rounded-md p-2"
-            required
-          />
-        </div>
-        <div class="mb-4">
-          <label class="block text-gray-700">Description</label>
-          <textarea
-            v-model="description"
-            class="mt-1 block w-full border border-gray-300 rounded-md p-2"
-            rows="3"
-            required
-          ></textarea>
-        </div>
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea 
+          id="description" 
+          v-model="proposalDescription" 
+          required 
+          placeholder="Describe your proposal in detail"
+        ></textarea>
+      </div>
 
-        <div class="mb-4">
-          <label class="block text-gray-700">Options</label>
-          <div v-for="(option, index) in options" :key="index" class="border p-4 mb-4">
-            <div class="mb-2">
-              <label class="block text-gray-700">Option Name</label>
-              <input
-                v-model="option.name"
-                type="text"
-                class="mt-1 block w-full border border-gray-300 rounded-md p-2"
-                required
-              />
-            </div>
-            <div class="mb-2">
-              <label class="block text-gray-700">Option Description</label>
-              <textarea
-                v-model="option.details"
-                class="mt-1 block w-full border border-gray-300 rounded-md p-2"
-                rows="2"
-              ></textarea>
-            </div>
-            <button
-              type="button"
-              @click="removeOption(index)"
-              class="text-red-600 hover:text-red-800"
-            >
-              Remove Option
-            </button>
-          </div>
-          <button
-            type="button"
-            @click="addOption"
-            class="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-400"
+      <div class="form-group">
+        <label>Voting Options</label>
+        <div 
+          v-for="(option, index) in votingOptions" 
+          :key="index" 
+          class="option-input"
+        >
+          <input 
+            type="text" 
+            v-model="votingOptions[index]" 
+            placeholder="Enter option"
           >
-            Add Option
+          <button 
+            type="button" 
+            @click="removeOption(index)" 
+            v-if="votingOptions.length > 2"
+          >
+            Remove
           </button>
         </div>
+        <button 
+          type="button" 
+          @click="addOption" 
+          class="add-option-btn"
+        >
+          Add Option
+        </button>
+      </div>
 
-        <div class="mb-4">
-          <label class="block text-gray-700">Creation Date</label>
-          <input
-            v-model="creationDate"
-            type="date"
-            class="mt-1 block w-full border border-gray-300 rounded-md p-2"
-            required
-          />
-        </div>
-        <div class="mb-4">
-          <label class="block text-gray-700">Deadline</label>
-          <input
-            v-model="deadline"
-            type="date"
-            class="mt-1 block w-full border border-gray-300 rounded-md p-2"
-            required
-          />
-        </div>
+      <div class="form-group">
+        <label for="deadline">Voting Deadline</label>
+        <input 
+          type="date" 
+          id="deadline" 
+          v-model="proposalDeadline" 
+          required
+        >
+      </div>
 
-        <button
-          type="submit"
-          class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-500"
+      <div class="form-actions">
+        <button 
+          type="submit" 
+          class="submit-btn"
         >
           Create Proposal
         </button>
-      </form>
-    </div>
-  </Layout>
+        <button 
+          type="button" 
+          class="cancel-btn" 
+          @click="cancelProposal"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
 </template>
 
-<script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import Layout from '../components/Layout.vue';
+<script>
+export default {
+  data() {
+    return {
+      proposalTitle: '',
+      proposalDescription: '',
+      votingOptions: ['', ''],
+      proposalDeadline: ''
+    }
+  },
+  methods: {
+    addOption() {
+      if (this.votingOptions.length < 5) {
+        this.votingOptions.push('')
+      }
+    },
+    removeOption(index) {
+      if (this.votingOptions.length > 2) {
+        this.votingOptions.splice(index, 1)
+      }
+    },
+    submitProposal() {
+      // Validate inputs
+      if (!this.proposalTitle || !this.proposalDescription || this.votingOptions.some(opt => !opt)) {
+        alert('Please fill all fields')
+        return
+      }
 
-const router = useRouter();
+      // Create proposal object
+      const newProposal = {
+        id: Date.now(),
+        title: this.proposalTitle,
+        description: this.proposalDescription,
+        status: 'ongoing',
+        creationDate: new Date().toISOString().split('T')[0],
+        deadline: this.proposalDeadline,
+        options: this.votingOptions.map((name, index) => ({
+          id: index + 1,
+          name,
+          votes: 0,
+          details: ''
+        })),
+        userVotingWeight: 1
+      }
 
-const proposalName = ref('');
-const description = ref('');
-const options = ref([
-  { name: '', details: '' },
-]);
+      // Get existing proposals from localStorage
+      const proposals = JSON.parse(localStorage.getItem('proposals') || '[]')
+      proposals.push(newProposal)
+      
+      // Save to localStorage
+      localStorage.setItem('proposals', JSON.stringify(proposals))
 
-const creationDate = ref('');
-const deadline = ref('');
-
-const addOption = () => {
-  options.value.push({ name: '', details: '' });
-};
-
-const removeOption = (index) => {
-  options.value.splice(index, 1);
-};
-
-const handleSubmit = () => {
-  // Validate options
-  if (options.value.length < 2) {
-    alert('Please provide at least two options.');
-    return;
-  }
-
-  for (let option of options.value) {
-    if (!option.name.trim()) {
-      alert('Option names cannot be empty.');
-      return;
+      // Navigate back to dashboard
+      this.$router.push('/')
+    },
+    cancelProposal() {
+      // Navigate back to dashboard
+      this.$router.push('/')
     }
   }
-
-  // Create new proposal object
-  const newProposal = {
-    id: Date.now(),
-    title: proposalName.value,
-    description: description.value,
-    status: 'ongoing',
-    creationDate: creationDate.value,
-    deadline: deadline.value,
-    options: options.value.map((option, index) => ({
-      id: Date.now() + index,
-      name: option.name.trim(),
-      votes: 0,
-      details: option.details.trim() || 'No details provided.',
-    })),
-    userVotingWeight: 5,
-  };
-
-  // Add new proposal to the proposal list
-  const storedProposals = JSON.parse(localStorage.getItem('proposals') || '[]');
-  storedProposals.push(newProposal);
-  localStorage.setItem('proposals', JSON.stringify(storedProposals));
-
-  alert(`Proposal "${proposalName.value}" has been created!`);
-
-  // Reset form
-  proposalName.value = '';
-  description.value = '';
-  options.value = [{ name: '', details: '' }];
-  creationDate.value = '';
-  deadline.value = '';
-
-  // Redirect to home page
-  router.push('/');
-};
+}
 </script>
+
+<style scoped>
+.create-proposal-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: white;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  border-radius: 0.5rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+}
+
+textarea {
+  min-height: 100px;
+}
+
+.option-input {
+  display: flex;
+  margin-bottom: 0.5rem;
+}
+
+.option-input input {
+  flex-grow: 1;
+  margin-right: 0.5rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.submit-btn, .cancel-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+}
+
+.submit-btn {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+}
+
+.cancel-btn {
+  background-color: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #d1d5db;
+}
+
+.add-option-btn {
+  margin-top: 0.5rem;
+  background-color: #10b981;
+  color: white;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}
+</style>
