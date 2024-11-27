@@ -64,14 +64,9 @@ contract VotingContract {
     }
 
     function createProposal(string memory description, uint256 durationInMinutes, QuorumType quorumType) public {
-        uint256 totalShares = 0;
-        for (uint256 i = 0; i < proposalCount; i++) {
-            totalShares += shares[msg.sender];
-        }
-
         require(
             shares[msg.sender] * 100 / totalShares >= 5,
-            "Sorry you need to have over 5% to create a proposal"
+            "Sorry, you need to have over 5% to create a proposal"
         );
 
         proposals[proposalCount] = Proposal({
@@ -193,7 +188,7 @@ contract VotingContract {
 
     function hasMetQuorum(uint256 proposalId) public view returns (bool) {
         Proposal storage proposal = proposals[proposalId];
-        uint256 totalVotes = proposal.votesFor + proposal.votesAgainst;
+        // uint256 totalVotes = proposal.votesFor + proposal.votesAgainst;
         uint256 quorumThreshold;
 
         if (proposal.quorumType == QuorumType.SimpleMajority) {
@@ -211,6 +206,10 @@ contract VotingContract {
 
     function getProposalOutcome(uint256 proposalId) public view returns (ProposalOutcome memory) {
         return proposalOutcomes[proposalId];
+    }
+
+    function getProposalsCount() public view returns (uint256) {
+        return proposalCount;
     }
 }
 // contract VotingContract {

@@ -27,9 +27,6 @@
         <router-link to="/create-proposal" class="navbar-item active">
           Create Proposal
         </router-link>
-        <a href="#" class="navbar-item" @click="handleProfile">
-          Profile
-        </a>
         <router-link to="/voting-history" class="navbar-item">
         Voting History
         </router-link>

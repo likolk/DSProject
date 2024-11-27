@@ -5,7 +5,9 @@ console.log("VotingContractABI:", VotingContractABI);
 
 const web3 = new Web3(Web3.givenProvider || "http://localhost:8545");
 
-const contractAddress = "0x89761C25938DDF45A738B065AeD189D3bF20D4a5";
+console.log("web3:", web3)
+
+const contractAddress = "0x9fD895aF7F241BfAC2a9d3EC4D08ddDaCBc857ab";
 
 
 const contract = new web3.eth.Contract(VotingContractABI.abi || VotingContractABI, contractAddress);
