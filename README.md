@@ -18,3 +18,21 @@ The deployed contract is stored in Ganache's blockchain, which can be accessed v
 We connect MetaMask to the Ganache network by adding Ganache’s RPC URL (`http://127.0.0.1:7545`) in MetaMask in the section for adding a custom network.  
 Import one of Ganache's private keys into MetaMask. Dynamically, if the ether balance is reduced in the Ganache interface, it will be reflected in MetaMask too.  
 Through MetaMask, users can vote by sending transactions to the deployed contract on the Ganache blockchain. We will see that later.
+
+
+## FLow to create the project
+
+Initialize a New Node.js Project => npm init -y
+This will create a package.json file in your project folder if it doesn't already exist.
+
+Install Hardhat: To initialize a Hardhat project, you need to install Hardhat as a dependency in your project => npm install --save-dev hardhat
+
+Initialize Hardhat Project: After installing Hardhat, run the following command to initialize a new Hardhat project => npx hardhat
+After choosing "Create a basic sample project," Hardhat will automatically generate the following:
+
+hardhat.config.js: This is the configuration file.
+A contracts/ folder.
+A sample test file in test/ folder.
+
+Install Hardhat Toolbox (if necessary): If you didn't select the option to install the Hardhat toolbox during initialization, you can manually install it by running => npm install --save-dev @nomicfoundation/hardhat-toolbox
+
