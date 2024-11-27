@@ -1,4 +1,15 @@
 <template>
+  <nav>
+    <div class="navbar-menu">
+        <router-link to="/" class="navbar-item">
+          Dashboard
+        </router-link>
+        <router-link to="/voting-history" class="navbar-item">
+        Voting History
+        </router-link>
+      </div>
+  </nav>
+  
   <div class="governance-app">
     <!-- Navbar and other UI components -->
     <div class="create-proposal-container">
@@ -119,18 +130,25 @@ export default {
         return;
       }
 
-      try {
-        await web3Service.createProposal(
-          this.proposalTitle,
-          this.proposalDescription,
-          this.proposalDeadline,
-          this.quorumType
-        );
-        this.$router.push("/");
-      } catch (error) {
-        console.error(error);
-        alert("Error creating proposal: " + error.message || error);
-      }
+      console.log("Submitting Proposal:", { 
+    title: this.proposalTitle, 
+    description: this.proposalDescription, 
+    deadline: this.proposalDeadline, 
+    quorumType: this.quorumType 
+  });
+  try {
+    await web3Service.createProposal(
+      this.proposalTitle,
+      this.proposalDescription,
+      this.proposalDeadline,
+      this.quorumType
+    );
+    this.$router.push("/");
+  } catch (error) {
+    console.error('Error during proposal creation:', error);
+    alert(`Error creating proposal: ${error.message || error}`);
+  }
+
     },
     cancelProposal() {
       this.$router.push("/");
@@ -138,59 +156,82 @@ export default {
     handleProfile() {
       this.$router.push("/profile");
     },
-    handleLogout() {
-      alert("Logout functionality not implemented");
-    },
   },
 };
 </script>
 
 <style scoped>
-.governance-app {
-  font-family: "Roboto", sans-serif;
-  background: #002aff;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.navbar {
-  background-color: #3b82f6;
-  color: #fff;
+.governance-app {
+  background: linear-gradient(to right, #4f46e5, #7c3aed);
+  color: white;
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.header h1 {
+  font-size: 2.25rem;
+  font-weight: 800;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.dashboard-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
 }
 
-.navbar-logo {
+.dashboard-title h2 {
   font-size: 1.5rem;
-  font-weight: bold;
-  text-decoration: none;
-  color: #fff;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
 }
 
+.dashboard-title p {
+  color: #6b7280;
+}
+
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #4f46e5;
+  color: white;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
 .navbar-menu {
   display: flex;
+  align-items: center;
   gap: 1rem;
 }
-
 .navbar-item {
-  color: #e0e7ff;
+  color: rgba(255,255,255,0.8);
   text-decoration: none;
-  font-weight: 500;
   padding: 0.5rem 1rem;
-  transition: all 0.3s ease;
-  border-radius: 0.5rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s, color 0.2s;
 }
-
-.navbar-item.active,
 .navbar-item:hover {
-  background-color: #2563eb;
-  color: #fff;
+  background-color: rgba(255,255,255,0.1);
+  color: white;
 }
-
+.navbar-item.active {
+  background-color: rgba(255,255,255,0.2);
+  color: white;
+}
 .create-proposal-container {
   background: #fff;
   max-width: 700px;
@@ -300,4 +341,58 @@ label {
   background: #ef4444;
   color: #fff;
 }
+
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #4f46e5;
+  color: white;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar-brand .navbar-logo {
+  color: white;
+  font-size: 1.25rem;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.navbar-menu {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.navbar-item {
+  color: rgba(255,255,255,0.8);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.navbar-item:hover {
+  background-color: rgba(255,255,255,0.1);
+  color: white;
+}
+
+.navbar-item.active {
+  background-color: rgba(255,255,255,0.2);
+  color: white;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Roboto", sans-serif;
+  color: #333;
+}
+
 </style>

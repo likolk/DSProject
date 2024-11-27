@@ -2,22 +2,19 @@
   <div class="governance-platform">
     <header class="header">
       <nav>
-      <h1>Decentralized Governance Platform</h1>
-      <div class="navbar-menu">
-        <router-link to="/" class="navbar-item active">
-          Dashboard
+        <h1>Decentralized Governance Platform</h1>
+        <div class="navbar-menu">
+          <router-link to="/" class="navbar-item active">
+            Dashboard
+          </router-link>
+          <router-link to="/create-proposal" class="navbar-item">
+            Create Proposal
+          </router-link>
+          <router-link to="/voting-history" class="navbar-item">
+        Voting History
         </router-link>
-        <router-link to="/create-proposal" class="navbar-item">
-          Create Proposal
-        </router-link>
-        <a href="#" class="navbar-item" @click="handleProfile">
-          Profile
-        </a>
-        <a href="#" class="navbar-item" @click="handleLogout">
-          Logout
-        </a>
-      </div>
-    </nav>
+        </div>
+      </nav>
     </header>
 
     <div class="container">
@@ -26,9 +23,7 @@
           <h2>Proposal Dashboard</h2>
           <p>Explore and participate in active governance proposals</p>
         </div>
-        <button class="create-btn" @click="navigateToCreateProposal">
-          Create Proposal
-        </button>
+        <button class="create-btn" @click="navigateToCreateProposal">Create Proposal</button>
       </div>
 
       <table class="proposals-table">
@@ -102,42 +97,42 @@
 </template>
 
 <script>
+
+import Web3 from 'web3';
+import contractABI from "../../../voting-system-smart-contracts/artifacts/contracts/voting.sol/Voting.json";
+const contractAddress = '0xc8751Ba127C15dbFddB438CD51737184e6Cfe1c5'
+const web3 = new Web3(window.ethereum);
+await window.ethereum.enable();
+
 export default {
   data() {
     return {
       proposals: [],
-      initialProposals: [
-        {
-          id: 1,
-          title: 'Investment Strategy Selection',
-          description: 'Please choose the investment portfolio you think is most suitable.',
-          status: 'ongoing',
-          creationDate: '2023-09-01',
-          deadline: '2023-09-30',
-          options: [
-            { id: 1, name: 'Stocks', votes: 50, details: 'Stocks are securities representing ownership in a company.' },
-            { id: 2, name: 'Bonds', votes: 30, details: 'Bonds are debt securities issued by companies or governments.' },
-            { id: 3, name: 'Mixed Funds', votes: 20, details: 'Mixed funds invest in a combination of stocks and bonds.' }
-          ],
-          userVotingWeight: 5
-        },
-        {
-          id: 2,
-          title: 'Company Strategy Adjustment',
-          description: 'Please choose the future development direction of the company.',
-          status: 'ongoing',
-          creationDate: '2023-08-15',
-          deadline: '2023-09-15',
-          options: [
-            { id: 4, name: 'Expand Overseas Markets', votes: 40, details: 'Expanding overseas markets helps the company globalize.' },
-            { id: 5, name: 'Focus on Domestic Business', votes: 60, details: 'Focusing on domestic business can consolidate the existing market.' }
-          ],
-          userVotingWeight: 1
-        }
-      ]
     }
   },
+
+  mounted() {
+    this.fetchProposals();
+},
   methods: {
+    async fetchProposals() {
+  console.log("Fetching proposals...");
+  const contract = new web3.eth.Contract(contractABI.abi, contractAddress);
+  console.log("Contract:", contract);
+  try {
+    const proposalsCount = await contract.methods.getProposalsCount().call();
+    console.log("Proposals Count:", proposalsCount);
+    for (let i = 0; i < proposalsCount; i++) {
+      const proposal = await contract.methods.getProposal(i).call();
+      console.log("Fetched Proposal:", proposal);
+    }
+  } catch (error) {
+    console.error("Error fetching proposals:", error);
+    console.error("Contract ABI:", contractABI);
+    console.error("Contract Address:", contractAddress);
+  }
+},
+
     navigateToCreateProposal() {
     // Use Vue Router to programmatically navigate
     this.$router.push('/create-proposal')
@@ -211,10 +206,6 @@ export default {
       this.saveProposals()
     }
   },
-  mounted() {
-    this.initProposals()
-    setInterval(this.simulateVoting, 5000)
-  }
 }
 </script>
 
@@ -349,7 +340,6 @@ export default {
   color: #9ca3af;
   cursor: not-allowed;
 }
-
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -359,20 +349,11 @@ export default {
   padding: 1rem 2rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-
-.navbar-brand .navbar-logo {
-  color: white;
-  font-size: 1.25rem;
-  font-weight: bold;
-  text-decoration: none;
-}
-
 .navbar-menu {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
-
 .navbar-item {
   color: rgba(255,255,255,0.8);
   text-decoration: none;
@@ -380,14 +361,50 @@ export default {
   border-radius: 0.25rem;
   transition: background-color 0.2s, color 0.2s;
 }
-
 .navbar-item:hover {
   background-color: rgba(255,255,255,0.1);
   color: white;
 }
-
 .navbar-item.active {
   background-color: rgba(255,255,255,0.2);
   color: white;
 }
+
+
+.create-btn,
+.vote-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.create-btn:hover,
+.vote-btn:hover {
+  background-color: #5b21b6;
+}
+
+.vote-btn:disabled {
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Roboto", sans-serif;
+  color: #333;
+}
+
+
 </style>

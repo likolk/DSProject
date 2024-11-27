@@ -16,9 +16,9 @@
           <a href="#" class="navbar-item active">
             Profile
           </a>
-          <a href="#" class="navbar-item" @click="handleLogout">
-            Logout
-          </a>
+          <router-link to="/voting-history" class="navbar-item">
+        Voting History
+        </router-link>
         </div>
       </nav>
   
@@ -116,10 +116,6 @@
           localStorage.setItem('userProfile', JSON.stringify(this.userProfile));
         }
         this.isEditing = !this.isEditing;
-      },
-      handleLogout() {
-        alert('Logging out...');
-        // Add actual logout functionality here
       },
     },
     mounted() {
