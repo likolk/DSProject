@@ -6,7 +6,7 @@ import "./VotingWithRewards.sol";
 
 contract VotingContract {
     mapping(address => uint256) public shares;
-    mapping(uint256 => Proposal) public proposals;
+    // mapping(uint256 => Proposal) public proposals;
     mapping(address => VotingRecord[]) public votingHistory;
     mapping(uint256 => ProposalOutcome) public proposalOutcomes;
     uint256 public proposalCount;
@@ -24,6 +24,8 @@ contract VotingContract {
         uint256 totalVotesCast;
         QuorumType quorumType;
     }
+
+    Proposal[] public proposals;
 
     struct VotingRecord {
         uint256 proposalId;
@@ -196,25 +198,39 @@ contract VotingContract {
         return proposalCount;
     }
 
-    function getProposals(uint256 startIndex, uint256 endIndex) public view returns (Proposal[] memory) {
-        require(startIndex < proposalCount, "Start index is out of bounds");
-        require(endIndex <= proposalCount, "End index is out of bounds");
-        require(startIndex < endIndex, "Start index must be less than end index");
+function getProposals() public view returns (
+    uint[] memory ids,
+    string[] memory titles,
+    string[] memory descriptions,
+    uint[] memory votesForArray,
+    uint[] memory votesAgainstArray,
+    bool[] memory actives
+) {
+    uint256 count = proposals.length;
 
-        uint256 length = endIndex - startIndex;
-        Proposal[] memory proposalsList = new Proposal[](length);
+    // Initialize arrays to hold the proposal details
+    ids = new uint256[](count);
+    titles = new string[](count);
+    descriptions = new string[](count);
+    votesForArray = new uint256[](count);
+    votesAgainstArray = new uint256[](count);
+    actives = new bool[](count);
 
-        for (uint256 i = 0; i < length; i++) {
-            proposalsList[i] = proposals[startIndex + i];
-        }
-
-        return proposalsList;
+    // Loop through each proposal and store its details in the arrays
+    for (uint256 i = 0; i < count; i++) {
+        ids[i] = i;
+        titles[i] = proposals[i].title;
+        descriptions[i] = proposals[i].description;
+        votesForArray[i] = proposals[i].votesFor;
+        votesAgainstArray[i] = proposals[i].votesAgainst;
+        actives[i] = proposals[i].active;
     }
-
-
-    
-
 }
+}
+
+
+
+
 // contract VotingContract {
 //     mapping(address => uint256) public shares;
 //     mapping(uint256 => Proposal) public proposals;
