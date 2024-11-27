@@ -15,9 +15,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.1.0"
-  }
-}
-{
+  },
   "name": "voting-system-smart-contracts",
   "version": "1.0.0",
   "main": "index.js",
