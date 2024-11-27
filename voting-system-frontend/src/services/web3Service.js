@@ -1,16 +1,12 @@
 import Web3 from "web3";
-import VotingContractABI from "../../../voting-system-smart-contracts/artifacts/contracts/voting.sol/Voting.json";
+import VotingContractABI from "../../../voting-system-smart-contracts/artifacts/contracts/smartContract.sol/VotingContract.json";
 
 console.log("VotingContractABI:", VotingContractABI);  
 
 const web3 = new Web3(Web3.givenProvider || "http://localhost:8545");
 const contractAddress = "0x9fD895aF7F241BfAC2a9d3EC4D08ddDaCBc857ab";
-
-
 const contract = new web3.eth.Contract(VotingContractABI.abi || VotingContractABI, contractAddress);
-
 console.log("VotingContractABI:", VotingContractABI);
-
 
 export default {
   async createProposal(proposalTitle, proposalDescription, votingDeadline, quorumType) {
@@ -43,4 +39,5 @@ export default {
     const outcome = await contract.methods.getProposalOutcome(proposalId).call();
     return outcome;
   },
+
 };

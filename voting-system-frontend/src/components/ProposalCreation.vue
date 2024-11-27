@@ -4,6 +4,19 @@
         <div class="input-container">
             <input v-model="proposalTitle" placeholder="Proposal Title" class="input-field" />
             <textarea v-model="proposalDescription" placeholder="Proposal Description" class="input-field"></textarea>
+            <input
+                v-model.number="durationInMinutes"
+                type="number"
+                placeholder="Duration (in minutes)"
+                class="input-field"
+            />
+            <select v-model="quorumType" class="input-field">
+                <option disabled value="">Select Quorum Type</option>
+                <option value="0">Simple Majority</option>
+                <option value="1">Two-Thirds Majority</option>
+                <option value="2">Three-Quarters Majority</option>
+                <option value="3">Unanimous Majority</option>
+            </select>
         </div>
         <button @click="createProposal" class="create-button">Create Proposal</button>
     </div>
@@ -12,6 +25,7 @@
 <script>
 import { ref } from "vue";
 import Web3 from "web3";
+import votingAbi from "../../../voting-system-smart-contracts/artifacts/contracts/smartContract.sol/VotingContract.json";
 
 export default {
     name: "ProposalCreation",
@@ -19,29 +33,52 @@ export default {
         return {
             proposalTitle: "",
             proposalDescription: "",
+            durationInMinutes: null,
+            quorumType: "",
         };
     },
     methods: {
         async createProposal() {
-            if (!this.proposalTitle || !this.proposalDescription) {
-                alert("Please provide a title and description for the proposal.");
-                return;
-            }
+  if (!this.proposalTitle || !this.proposalDescription) {
+    alert("Please provide a title and description for the proposal.");
+    return;
+  }
+  if (!this.durationInMinutes || this.durationInMinutes <= 0) {
+    alert("Please specify a valid duration in minutes.");
+    return;
+  }
+  if (this.quorumType === "") {
+    alert("Please select a quorum type.");
+    return;
+  }
 
-            const web3 = new Web3(window.ethereum);
-            const contract = this.getVotingContract(web3);
+  const web3 = new Web3(window.ethereum);
+  const contract = this.getVotingContract(web3);
 
-            try {
-                await contract.methods.createProposal(this.proposalTitle, this.proposalDescription).send({ from: window.ethereum.selectedAddress });
-                alert("Proposal created successfully!");
-            } catch (err) {
-                alert("Failed to create proposal.");
-            }
-        },
+
+  const valueInWei = web3.utils.toWei('5', 'ether');
+
+  try {
+    await contract.methods
+      .createProposal(
+        this.proposalTitle,
+        this.proposalDescription,
+        this.durationInMinutes,
+        this.quorumType
+      )
+      .send({
+        from: window.ethereum.selectedAddress,
+        value: valueInWei, // Include ETH value here
+      });
+    alert("Proposal created successfully!");
+  } catch (err) {
+    alert("Failed to create proposal.");
+    console.error(err);
+  }
+},
         getVotingContract(web3) {
             const contractAddress = "0x71f13461195DaB07902cac189572a3d44d949253";
-            const contractABI = [];
-            return new web3.eth.Contract(contractABI, contractAddress);
+            return new web3.eth.Contract(votingAbi.abi, contractAddress);
         },
     },
 };

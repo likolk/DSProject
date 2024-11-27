@@ -1,53 +1,70 @@
 <template>
-    <div>
-      <h3>Voting History</h3>
-      <div v-for="history in votingHistory" :key="history.proposalId">
-        <p>Proposal: {{ history.title }}</p>
-        <p>Outcome: {{ history.outcome }}</p>
-      </div>
+  <div>
+    <h3>Voting History</h3>
+    <div v-for="history in votingHistory" :key="history.proposalId">
+      <p>Proposal: {{ history.title }}</p>
+      <p>Outcome: {{ history.outcome }}</p>
     </div>
-  </template>
-  
-  <script>
-  import { ref } from "vue";
-  import Web3 from "web3";
-  
-  export default {
-    name: "VotingHistoryDashboard",
-    data() {
-      return {
-        votingHistory: [],
-        web3: null,
-        contract: null,
-      };
-    },
-    created() {
+  </div>
+</template>
+
+<script>
+import { ref } from "vue";
+import Web3 from "web3";
+import votingAbi from "../../../voting-system-smart-contracts/artifacts/contracts/smartContract.sol/VotingContract.json";
+
+export default {
+  name: "VotingHistoryDashboard",
+  data() {
+    return {
+      votingHistory: [],
+      web3: null,
+      contract: null,
+      account: "",
+    };
+  },
+  created() {
+    this.initializeWeb3();
+  },
+  methods: {
+    async initializeWeb3() {
+      if (!this.web3) {
+        this.web3 = new Web3(window.ethereum); 
+      }
+      const accounts = await this.web3.eth.getAccounts();
+      this.account = accounts[0];
+      this.contract = this.getVotingContract();
       this.fetchVotingHistory();
     },
-    methods: {
-      async fetchVotingHistory() {
-        if (!this.web3) {
-          this.web3 = new Web3(window.ethereum); // Initialize Web3 instance
+
+    async fetchVotingHistory() {
+      try {
+        const votingRecords = await this.contract.methods.votingHistory(this.account).call();
+        for (let i = 0; i < votingRecords.length; i++) {
+          const record = votingRecords[i];
+          const proposal = await this.contract.methods.proposals(record.proposalId).call();
+
+          const outcome = await this.contract.methods.getProposalOutcome(record.proposalId).call();
+
+          this.votingHistory.push({
+            proposalId: record.proposalId,
+            title: proposal.title,
+            outcome: outcome.passed ? "Passed" : "Failed",
+          });
         }
-        const accounts = await this.web3.eth.getAccounts();
-        const contract = this.getVotingContract();
-        
-        // Fetch voting history from the smart contract
-        try {
-          const history = await contract.methods.getVotingHistory().call({ from: accounts[0] });
-          this.votingHistory = history;
-        } catch (err) {
-          console.error("Error fetching voting history:", err);
-        }
-      },
-      getVotingContract() {
-        const contractAddress = "0x71f13461195DaB07902cac189572a3d44d949253";
-        const contractABI = []; 
-        return new this.web3.eth.Contract(contractABI, contractAddress);
-      },
+      } catch (err) {
+        console.error("Error fetching voting history:", err);
+      }
     },
-  };
-  </script>
+
+    getVotingContract() {
+      const contractAddress = "0x4Bc8f45D2e7CA3f23d593fFd25FBdc9E19B3F89f";
+      return new this.web3.eth.Contract(votingAbi.abi, contractAddress);
+    },
+  },
+};
+</script>
+
 <style scoped>
 h3 {
   text-align: center;
@@ -83,6 +100,4 @@ div p span {
   font-weight: bold;
   color: #007bff;
 }
-
 </style>
-  
