@@ -122,6 +122,10 @@ export default {
     }
   },
   methods: {
+    navigateToCreateProposal() {
+    // Use Vue Router to programmatically navigate
+    this.$router.push('/create-proposal')
+  },
     getStatusClasses(status) {
       const statusMap = {
         'ongoing': 'status-ongoing',
@@ -145,9 +149,6 @@ export default {
 
       option.votes += proposal.userVotingWeight
       this.saveProposals()
-    },
-    navigateToCreateProposal() {
-      alert('Create Proposal functionality not implemented')
     },
     showProposalDetails(proposalId) {
       const proposal = this.proposals.find(p => p.id === proposalId)
