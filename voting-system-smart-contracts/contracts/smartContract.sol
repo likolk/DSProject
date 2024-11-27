@@ -50,7 +50,7 @@ contract VotingContract {
     constructor(address _tokenAddress) {
         governanceToken = GovernanceToken(_tokenAddress); 
     }
-    function registerVoter(address voter, uint256 shareCount) public {
+    function registerShareholder(address voter, uint256 shareCount) public {
         require(!isVotingPeriodActive, "Hey its an active voting period, you cannot vote now." );
         shares[voter] = shareCount;
         totalShares += shareCount;
@@ -195,6 +195,7 @@ contract VotingContract {
     function getProposalsCount() public view returns (uint256) {
         return proposalCount;
     }
+    
 
 }
 // contract VotingContract {
