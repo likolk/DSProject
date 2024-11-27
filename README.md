@@ -36,3 +36,6 @@ A sample test file in test/ folder.
 
 Install Hardhat Toolbox (if necessary): If you didn't select the option to install the Hardhat toolbox during initialization, you can manually install it by running => npm install --save-dev @nomicfoundation/hardhat-toolbox
 
+To run:
+npx hardhat run scripts/deploy.js --network localhost => to deploy the contract on one of the account of ganache
+npx hardhat run scripts/interact.js --network localhost => to vote
