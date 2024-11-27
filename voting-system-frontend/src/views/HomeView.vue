@@ -142,6 +142,9 @@ export default {
     // Use Vue Router to programmatically navigate
     this.$router.push('/create-proposal')
   },
+  handleProfile() {
+      this.$router.push("/profile");
+    },
     getStatusClasses(status) {
       const statusMap = {
         'ongoing': 'status-ongoing',

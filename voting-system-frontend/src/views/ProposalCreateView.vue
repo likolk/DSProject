@@ -163,7 +163,7 @@ export default {
       this.$router.push("/");
     },
     handleProfile() {
-      alert("Profile functionality not implemented");
+      this.$router.push("/profile");
     },
     handleLogout() {
       alert("Logout functionality not implemented");
