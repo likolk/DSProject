@@ -1,0 +1,2 @@
+const voting = await ethers.getContractAt("Voting", "0x89761C25938DDF45A738B065AeD189D3bF20D4a5", owner);
+const [owner] = await ethers.getSigners();

@@ -1,30 +1,10 @@
 <template>
   <div class="governance-app">
-    <nav class="navbar">
-      <div class="navbar-brand">
-        <router-link to="/" class="navbar-logo">
-          Governance Platform
-        </router-link>
-      </div>
-      <div class="navbar-menu">
-        <router-link to="/" class="navbar-item">
-          Dashboard
-        </router-link>
-        <router-link to="/create-proposal" class="navbar-item active">
-          Create Proposal
-        </router-link>
-        <a href="#" class="navbar-item" @click="handleProfile">
-          Profile
-        </a>
-        <a href="#" class="navbar-item" @click="handleLogout">
-          Logout
-        </a>
-      </div>
-    </nav>
-
+    <!-- Navbar and other UI components -->
     <div class="create-proposal-container">
       <h1 class="title">Create a New Proposal</h1>
       <form @submit.prevent="submitProposal" class="proposal-form">
+        <!-- Form Fields -->
         <div class="form-group">
           <label for="title">Proposal Title</label>
           <input
@@ -106,13 +86,16 @@
 </template>
 
 <script>
+import web3Service from "@/services/web3Service"; 
 export default {
+
   data() {
     return {
       proposalTitle: "",
       proposalDescription: "",
       votingOptions: ["", ""],
       proposalDeadline: "",
+      quorumType: 0,
     };
   },
   methods: {
@@ -126,7 +109,7 @@ export default {
         this.votingOptions.splice(index, 1);
       }
     },
-    submitProposal() {
+    async submitProposal() {
       if (
         !this.proposalTitle ||
         !this.proposalDescription ||
@@ -136,28 +119,18 @@ export default {
         return;
       }
 
-      const newProposal = {
-        id: Date.now(),
-        title: this.proposalTitle,
-        description: this.proposalDescription,
-        status: "ongoing",
-        creationDate: new Date().toISOString().split("T")[0],
-        deadline: this.proposalDeadline,
-        options: this.votingOptions.map((name, index) => ({
-          id: index + 1,
-          name,
-          votes: 0,
-          details: "",
-        })),
-        userVotingWeight: 1,
-      };
-
-      const proposals = JSON.parse(localStorage.getItem("proposals") || "[]");
-      proposals.push(newProposal);
-
-      localStorage.setItem("proposals", JSON.stringify(proposals));
-
-      this.$router.push("/");
+      try {
+        await web3Service.createProposal(
+          this.proposalTitle,
+          this.proposalDescription,
+          this.proposalDeadline,
+          this.quorumType
+        );
+        this.$router.push("/");
+      } catch (error) {
+        console.error(error);
+        alert("Error creating proposal: " + error.message || error);
+      }
     },
     cancelProposal() {
       this.$router.push("/");
