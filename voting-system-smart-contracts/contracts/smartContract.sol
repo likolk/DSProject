@@ -195,6 +195,23 @@ contract VotingContract {
     function getProposalsCount() public view returns (uint256) {
         return proposalCount;
     }
+
+    function getProposals(uint256 startIndex, uint256 endIndex) public view returns (Proposal[] memory) {
+        require(startIndex < proposalCount, "Start index is out of bounds");
+        require(endIndex <= proposalCount, "End index is out of bounds");
+        require(startIndex < endIndex, "Start index must be less than end index");
+
+        uint256 length = endIndex - startIndex;
+        Proposal[] memory proposalsList = new Proposal[](length);
+
+        for (uint256 i = 0; i < length; i++) {
+            proposalsList[i] = proposals[startIndex + i];
+        }
+
+        return proposalsList;
+    }
+
+
     
 
 }
