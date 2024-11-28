@@ -13,6 +13,8 @@ import { ref } from "vue";
 import Web3 from "web3";
 import votingAbi from "../../../voting-system-smart-contracts/artifacts/contracts/smartContract.sol/VotingContract.json";
 
+console.log(window.ethereum);
+
 if (!window.ethereum) {
   alert("Ethereum wallet not found. Please install MetaMask or another wallet.");
 }
@@ -32,34 +34,37 @@ export default {
   },
   methods: {
     async connectWallet() {
-      console.log("connecting wallet");
-      if (window.ethereum) {
-        console.log("Ethereum is available.");
-        try {
-          this.web3 = new Web3(window.ethereum);
-          console.log("Web3 initialized:", this.web3);
-          console.log("Current provider:", this.web3.currentProvider);
+  console.log("Connecting wallet...");
+  if (window.ethereum) {
+    console.log("Ethereum is available.");
+    try {
+      this.web3 = new Web3(window.ethereum);
+      console.log("Web3 initialized:", this.web3);
+      console.log("Current provider:", this.web3.currentProvider);
 
-          // Request accounts from MetaMask
-          const accounts = await window.ethereum.request({ method: "eth_accounts" });
-          console.log("Connected accounts:", accounts);
-          const selectedAccount = accounts[0];
-          console.log("Selected account:", selectedAccount);
-          this.accounts = accounts;
-          // Get a valid account with balance
-          await this.selectAccountWithBalance();
+      // Force opening the MetaMask window to prompt for account selection
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      console.log("Connected accounts:", accounts);
+      this.accounts = accounts;
+      const selectedAccount = accounts[0];
+      console.log("Selected account:", selectedAccount);
+      this.selectedAccount = selectedAccount;
 
-          const contractAddress = "0x410a52a849479E8Dc87B07d89e72483A4b3ca098";
-          this.contract = new this.web3.eth.Contract(votingAbi.abi, contractAddress);
-          console.log("Contract initialized:", this.contract);
-        } catch (err) {
-          console.error("Error connecting wallet:", err);
-          this.errorMessage = "Please connect your Ethereum wallet.";
-        }
-      } else {
-        alert("Ethereum wallet not found.");
-      }
-    },
+      // Get a valid account with balance
+      await this.selectAccountWithBalance();
+
+      const contractAddress = "0x410a52a849479E8Dc87B07d89e72483A4b3ca098";
+      this.contract = new this.web3.eth.Contract(votingAbi.abi, contractAddress);
+      console.log("Contract initialized:", this.contract);
+    } catch (err) {
+      console.error("Error connecting wallet:", err);
+      this.errorMessage = "Please connect your Ethereum wallet.";
+    }
+  } else {
+    alert("Ethereum wallet not found.");
+  }
+}
+,
 
     // Check if the selected account has sufficient balance
     async hasSufficientBalance(account) {
@@ -142,6 +147,7 @@ export default {
   },
 };
 </script>
+
 
 
 
