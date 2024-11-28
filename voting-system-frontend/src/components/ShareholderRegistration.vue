@@ -41,14 +41,15 @@ export default {
           console.log("Current provider:", this.web3.currentProvider);
 
           // Request accounts from MetaMask
-          const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+          const accounts = await window.ethereum.request({ method: "eth_accounts" });
           console.log("Connected accounts:", accounts);
-
+          const selectedAccount = accounts[0];
+          console.log("Selected account:", selectedAccount);
           this.accounts = accounts;
           // Get a valid account with balance
           await this.selectAccountWithBalance();
 
-          const contractAddress = "0x71f13461195DaB07902cac189572a3d44d949253";
+          const contractAddress = "0x410a52a849479E8Dc87B07d89e72483A4b3ca098";
           this.contract = new this.web3.eth.Contract(votingAbi.abi, contractAddress);
           console.log("Contract initialized:", this.contract);
         } catch (err) {
@@ -135,7 +136,7 @@ export default {
     },
 
     getVotingContract(signer) {
-      const contractAddress = "0x71f13461195DaB07902cac189572a3d44d949253";
+      const contractAddress = "0x410a52a849479E8Dc87B07d89e72483A4b3ca098";
       return new this.web3.eth.Contract(votingAbi.abi, contractAddress, signer);
     },
   },

@@ -18,26 +18,27 @@
 <script>
 import { ref } from "vue";
 import Web3 from 'web3';
+import { eventBus } from '@/services/eventBus'; // Updated import
+import votingAbi from "../../../voting-system-smart-contracts/artifacts/contracts/smartContract.sol/VotingContract.json";
 
 export default {
     name: "VotingComponent",
     data() {
         return {
-            proposals: [], 
-            totalVotes: 0, 
-            votingStatus: false, 
+            proposals: [],
+            totalVotes: 0,
+            votingStatus: false,
         };
     },
     methods: {
         async vote(proposalId, voteOption) {
             const web3 = new Web3(window.ethereum);
             const contract = this.getVotingContract(web3);
-            
             try {
                 await contract.methods.castVote(proposalId, voteOption).send({ from: window.ethereum.selectedAddress });
-                this.updateVotes();
+                this.fetchProposals();
             } catch (err) {
-                alert("Voting failed.");
+                console.error("Voting failed:", err);
             }
         },
         async updateVotes() {
@@ -47,19 +48,51 @@ export default {
             this.totalVotes = progress;
         },
         getVotingContract(web3) {
-            const contractAddress = "0x71f13461195DaB07902cac189572a3d44d949253"; 
-            const contractABI = [];
-            return new web3.eth.Contract(contractABI, contractAddress);
+            const contractAddress = "0x0e87A7677961a8705bAf7ae7Cd01e8AD66D90645";
+            return new web3.eth.Contract(votingAbi.abi, contractAddress);
         },
         async fetchProposals() {
             const web3 = new Web3(window.ethereum);
             const contract = this.getVotingContract(web3);
-            this.proposals = await contract.methods.getProposals().call();
+            try {
+                const proposals = await contract.methods.getProposals().call();
+                console.log("got proposals:", proposals)
+                const { ids, titles, descriptions, votesForArray, votesAgainstArray, actives } = proposals;
+                const proposalsList = ids.map((id, index) => ({
+                    id: id,
+                    title: titles[index],
+                    description: descriptions[index],
+                    votesFor: votesForArray[index],
+                    votesAgainst: votesAgainstArray[index],
+                    active: actives[index]
+                }));
+
+                console.log('Proposals:', proposalsList);
+                return proposalsList;
+            } catch (error) {
+                console.error('Error fetching proposals:', error);
+                return [];
+            }
+        }
+    }
+    ,
+    async created() {
+        if (window.ethereum) {
+            const web3 = new Web3(window.ethereum);
+            try {
+                await window.ethereum.request({ method: "eth_requestAccounts" });
+                this.fetchProposals();
+            } catch (err) {
+                console.error("Error connecting to wallet:", err);
+                alert("Wallet connection failed.");
+            }
+        } else {
+            alert("Please install MetaMask to interact with this application.");
         }
     },
-    created() {
-        this.fetchProposals();
-    },
+    // beforeDestroy() {
+    //     eventBus.off('newProposalCreated', this.fetchProposals);
+    // }
 };
 </script>
 
