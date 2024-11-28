@@ -26,6 +26,8 @@
 import { ref } from "vue";
 import Web3 from "web3";
 import votingAbi from "../../../voting-system-smart-contracts/artifacts/contracts/smartContract.sol/VotingContract.json";
+import { eventBus } from '@/services/eventBus'; 
+
 
 export default {
     name: "ProposalCreation",
@@ -56,7 +58,7 @@ export default {
   const contract = this.getVotingContract(web3);
 
 
-  const valueInWei = web3.utils.toWei('5', 'ether');
+  const valueInWei = web3.utils.toWei('1', 'ether');
 
   try {
     await contract.methods
@@ -70,6 +72,8 @@ export default {
         from: window.ethereum.selectedAddress,
         value: valueInWei, // Include ETH value here
       });
+    // Emit event to notify VotingComponent to fetch proposals
+    eventBus.emit('newProposalCreated');
     alert("Proposal created successfully!");
   } catch (err) {
     alert("Failed to create proposal.");
@@ -77,7 +81,7 @@ export default {
   }
 },
         getVotingContract(web3) {
-            const contractAddress = "0x71f13461195DaB07902cac189572a3d44d949253";
+            const contractAddress = "0x1576cAf8De37e2132F15b604F9cDd2cc32834a03";
             return new web3.eth.Contract(votingAbi.abi, contractAddress);
         },
     },
