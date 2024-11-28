@@ -1,9 +1,18 @@
 <template>
   <div>
     <h3>Voting History</h3>
-    <div v-for="history in votingHistory" :key="history.proposalId">
-      <p>Proposal: {{ history.title }}</p>
-      <p>Outcome: {{ history.outcome }}</p>
+    <div v-for="history in votingHistory" :key="history.proposalId" class="history-card">
+      <h4>{{ history.title }}</h4>
+      <p><strong>Description:</strong> {{ history.description }}</p>
+      <p><strong>Outcome:</strong> 
+        <span :class="{'passed': history.outcome === 'Passed', 'failed': history.outcome === 'Failed', 'ongoing': history.outcome === 'Ongoing'}">
+          {{ history.outcome }}
+        </span>
+      </p>
+      <p><strong>Votes For:</strong> {{ history.votesFor }}</p>
+      <p><strong>Votes Against:</strong> {{ history.votesAgainst }}</p>
+      <p><strong>Voting Period:</strong> {{ history.startTime }} to {{ history.endTime }}</p>
+      <p><strong>Quorum Met:</strong> {{ history.quorumMet ? "Yes" : "No" }}</p>
     </div>
   </div>
 </template>
@@ -29,7 +38,7 @@ export default {
   methods: {
     async initializeWeb3() {
       if (!this.web3) {
-        this.web3 = new Web3(window.ethereum); 
+        this.web3 = new Web3(window.ethereum);
       }
       const accounts = await this.web3.eth.getAccounts();
       this.account = accounts[0];
@@ -39,17 +48,26 @@ export default {
 
     async fetchVotingHistory() {
       try {
-        const votingRecords = await this.contract.methods.votingHistory(this.account).call();
-        for (let i = 0; i < votingRecords.length; i++) {
-          const record = votingRecords[i];
-          const proposal = await this.contract.methods.proposals(record.proposalId).call();
-
-          const outcome = await this.contract.methods.getProposalOutcome(record.proposalId).call();
+        const proposalCount = await this.contract.methods.getProposalsCount().call();
+        for (let i = 0; i < proposalCount; i++) {
+          const proposal = await this.contract.methods.proposals(i).call();
+          const outcome = await this.contract.methods.getProposalOutcome(i).call();
+          const quorumInfo = await this.contract.methods.getVotingProgress(i).call();
 
           this.votingHistory.push({
-            proposalId: record.proposalId,
+            proposalId: i,
             title: proposal.title,
-            outcome: outcome.passed ? "Passed" : "Failed",
+            description: proposal.description,
+            outcome: proposal.active
+              ? "Ongoing"
+              : outcome.passed
+              ? "Passed"
+              : "Failed",
+            votesFor: outcome.votesFor,
+            votesAgainst: outcome.votesAgainst,
+            startTime: new Date(proposal.votingEndTime * 1000 - proposal.votingEndTime * 60000).toLocaleString(),
+            endTime: new Date(proposal.votingEndTime * 1000).toLocaleString(),
+            quorumMet: quorumInfo.progress >= quorumInfo.requiredQuorum,
           });
         }
       } catch (err) {
@@ -73,31 +91,38 @@ h3 {
   color: #333;
 }
 
-div {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 20px;
-}
-
-div p {
-  font-size: 18px;
-  margin: 10px 0;
-  padding: 10px;
+.history-card {
   background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  width: 80%;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 10px auto;
   max-width: 600px;
-  text-align: left;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-div p:nth-child(even) {
-  background-color: #f1f1f1;
+.history-card h4 {
+  margin: 0;
+  font-size: 20px;
+  color: #555;
 }
 
-div p span {
+.history-card p {
+  font-size: 16px;
+  margin: 5px 0;
+}
+
+.passed {
+  color: green;
   font-weight: bold;
-  color: #007bff;
+}
+
+.failed {
+  color: red;
+  font-weight: bold;
+}
+
+.ongoing {
+  color: orange;
+  font-weight: bold;
 }
 </style>
