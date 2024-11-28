@@ -11,6 +11,7 @@
 <script>
 import { ref } from "vue";
 import Web3 from "web3";
+import votingAbi from "../../../voting-system-smart-contracts/artifacts/contracts/smartContract.sol/VotingContract.json";
 
 export default {
   name: "VotingProgress",
@@ -29,10 +30,9 @@ export default {
       this.progress = await contract.methods.getVotingProgress().call();
     },
     getVotingContract(web3) {
-      const contractAddress = "0x71f13461195DaB07902cac189572a3d44d949253"; 
-      const contractABI = []; 
-      return new web3.eth.Contract(contractABI, contractAddress);
-    },
+            const contractAddress = "0x1576cAf8De37e2132F15b604F9cDd2cc32834a03";
+            return new web3.eth.Contract(votingAbi.abi, contractAddress);
+        },
   },
 };
 </script>

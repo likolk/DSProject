@@ -153,4 +153,6 @@ h3 {
 .vote-status p {
     font-weight: bold;
 }
+
+
 </style>

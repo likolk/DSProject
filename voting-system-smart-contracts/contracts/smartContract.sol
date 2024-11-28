@@ -12,7 +12,14 @@ contract VotingContract {
     uint256 public proposalCount;
     uint256 public totalShares;
 
-    enum QuorumType {SimpleMajority, TwoThirds, ThreeQuarters, Unanimous}
+
+
+    enum QuorumType {
+        SimpleMajority,
+        TwoThirds,
+        ThreeQuarters,
+        Unanimous
+    }
 
     struct Proposal {
         string title;
@@ -34,31 +41,48 @@ contract VotingContract {
     }
 
     struct ProposalOutcome {
-        bool passed;      
-        uint256 votesFor;   
+        bool passed;
+        uint256 votesFor;
         uint256 votesAgainst;
     }
 
-    bool public isVotingPeriodActive; 
+    bool public isVotingPeriodActive;
     uint256 public votingEndTime;
 
     GovernanceToken public governanceToken;
 
-    event ProposalCreated(uint256 proposalId, string description, uint256 votingEndTime);
+    event ProposalCreated(
+        uint256 proposalId,
+        string description,
+        uint256 votingEndTime
+    );
     event SharesUpdated(address voter, uint256 newShares);
-    event VoteCast(uint256 proposalId, address voter, uint256 weight, bool voteFor);
+    event VoteCast(
+        uint256 proposalId,
+        address voter,
+        uint256 weight,
+        bool voteFor
+    );
     event RewardIssued(address voter, uint256 rewardAmount);
 
     constructor(address _tokenAddress) {
-        governanceToken = GovernanceToken(_tokenAddress); 
+        governanceToken = GovernanceToken(_tokenAddress);
     }
     function registerShareholder(address voter, uint256 shareCount) public {
-        require(!isVotingPeriodActive, "Hey its an active voting period, you cannot vote now." );
+        require(
+            !isVotingPeriodActive,
+            "Hey its an active voting period, you cannot vote now."
+        );
         shares[voter] = shareCount;
         totalShares += shareCount;
     }
 
-    function createProposal(string memory title, string memory description, uint256 durationInMinutes, QuorumType quorumType) public payable {
+    function createProposal(
+        string memory title,
+        string memory description,
+        uint256 durationInMinutes,
+        QuorumType quorumType
+    ) public payable {
         // require(
         //     shares[msg.sender] * 100 / totalShares >= 5,
         //     "Sorry, you need to have over 5% to create a proposal"
@@ -92,7 +116,7 @@ contract VotingContract {
         //     require(votingHistory[msg.sender][i].proposalId != proposalId, "You already voted on this proposal.");
         // }
         uint256 voteWeight = (shares[msg.sender] * 10000) / totalShares;
-        
+
         if (voteFor) {
             proposals[proposalId].votesFor += voteWeight;
         } else {
@@ -101,12 +125,13 @@ contract VotingContract {
 
         proposals[proposalId].totalVotesCast += voteWeight;
 
-        votingHistory[msg.sender].push(VotingRecord({
-            proposalId: proposalId,
-            votedFor: voteFor,
-            voteWeight: voteWeight
-        }));
-
+        votingHistory[msg.sender].push(
+            VotingRecord({
+                proposalId: proposalId,
+                votedFor: voteFor,
+                voteWeight: voteWeight
+            })
+        );
 
         uint256 rewardAmount = calculateReward(voteWeight);
         // require(governanceToken.balanceOf(msg.sender) == 0, "Rewards already claimed.");
@@ -119,7 +144,9 @@ contract VotingContract {
         }
     }
 
-    function calculateReward(uint256 voteWeight) internal pure returns (uint256) {
+    function calculateReward(
+        uint256 voteWeight
+    ) internal pure returns (uint256) {
         return voteWeight / 100;
     }
 
@@ -135,7 +162,8 @@ contract VotingContract {
             }
         }
 
-        bool passed = proposals[proposalId].votesFor > proposals[proposalId].votesAgainst;
+        bool passed = proposals[proposalId].votesFor >
+            proposals[proposalId].votesAgainst;
 
         proposalOutcomes[proposalId] = ProposalOutcome({
             passed: passed,
@@ -143,9 +171,16 @@ contract VotingContract {
             votesAgainst: proposals[proposalId].votesAgainst
         });
 
-        if (block.timestamp > proposals[proposalId].votingEndTime && !hasMetQuorum(proposalId)) {
+        if (
+            block.timestamp > proposals[proposalId].votingEndTime &&
+            !hasMetQuorum(proposalId)
+        ) {
             proposals[proposalId].active = false;
-            proposalOutcomes[proposalId] = ProposalOutcome(false, proposals[proposalId].votesFor, proposals[proposalId].votesAgainst);
+            proposalOutcomes[proposalId] = ProposalOutcome(
+                false,
+                proposals[proposalId].votesFor,
+                proposals[proposalId].votesAgainst
+            );
         }
 
         isVotingPeriodActive = activeProposals;
@@ -157,7 +192,9 @@ contract VotingContract {
         emit SharesUpdated(voter, newShares);
     }
 
-    function getVotingProgress(uint256 proposalId) public view returns (uint256 progress, uint256 requiredQuorum) {
+    function getVotingProgress(
+        uint256 proposalId
+    ) public view returns (uint256 progress, uint256 requiredQuorum) {
         Proposal memory proposal = proposals[proposalId];
         uint256 totalVotes = proposal.totalVotesCast;
         uint256 progressPercentage = (totalVotes * 100) / totalShares;
@@ -180,7 +217,7 @@ contract VotingContract {
         if (proposal.quorumType == QuorumType.SimpleMajority) {
             quorumThreshold = totalShares / 2;
         } else if (proposal.quorumType == QuorumType.TwoThirds) {
-            quorumThreshold = (totalShares * 2) / 3; 
+            quorumThreshold = (totalShares * 2) / 3;
         } else if (proposal.quorumType == QuorumType.ThreeQuarters) {
             quorumThreshold = (totalShares * 3) / 4;
         } else if (proposal.quorumType == QuorumType.Unanimous) {
@@ -190,7 +227,9 @@ contract VotingContract {
         return proposal.votesFor >= quorumThreshold;
     }
 
-    function getProposalOutcome(uint256 proposalId) public view returns (ProposalOutcome memory) {
+    function getProposalOutcome(
+        uint256 proposalId
+    ) public view returns (ProposalOutcome memory) {
         return proposalOutcomes[proposalId];
     }
 
@@ -198,38 +237,54 @@ contract VotingContract {
         return proposalCount;
     }
 
-function getProposals() public view returns (
-    uint[] memory ids,
-    string[] memory titles,
-    string[] memory descriptions,
-    uint[] memory votesForArray,
-    uint[] memory votesAgainstArray,
-    bool[] memory actives
-) {
-    uint256 count = proposals.length;
+    function getProposals()
+        public
+        view
+        returns (
+            uint[] memory ids,
+            string[] memory titles,
+            string[] memory descriptions,
+            uint[] memory votesForArray,
+            uint[] memory votesAgainstArray,
+            bool[] memory actives
+        )
+    {
+        uint256 count = proposals.length;
 
-    // Initialize arrays to hold the proposal details
-    ids = new uint256[](count);
-    titles = new string[](count);
-    descriptions = new string[](count);
-    votesForArray = new uint256[](count);
-    votesAgainstArray = new uint256[](count);
-    actives = new bool[](count);
+        // Initialize arrays to hold the proposal details
+        ids = new uint256[](count);
+        titles = new string[](count);
+        descriptions = new string[](count);
+        votesForArray = new uint256[](count);
+        votesAgainstArray = new uint256[](count);
+        actives = new bool[](count);
 
-    // Loop through each proposal and store its details in the arrays
-    for (uint256 i = 0; i < count; i++) {
-        ids[i] = i;
-        titles[i] = proposals[i].title;
-        descriptions[i] = proposals[i].description;
-        votesForArray[i] = proposals[i].votesFor;
-        votesAgainstArray[i] = proposals[i].votesAgainst;
-        actives[i] = proposals[i].active;
+        // Loop through each proposal and store its details in the arrays
+        for (uint256 i = 0; i < count; i++) {
+            ids[i] = i;
+            titles[i] = proposals[i].title;
+            descriptions[i] = proposals[i].description;
+            votesForArray[i] = proposals[i].votesFor;
+            votesAgainstArray[i] = proposals[i].votesAgainst;
+            actives[i] = proposals[i].active;
+        }
+    }
+
+    function getTotalSharesVoted(
+        uint256 proposalId
+    ) public view returns (uint256) {
+        uint256 totalSharesVoted = proposals[proposalId].totalVotesCast;
+        return totalSharesVoted;
+    }
+
+    // getshares function
+    function getShares(address voter) public view returns (uint256) {
+        return shares[voter];
+    }
+    function getUserProfile(address voter) public view returns (uint256, VotingRecord[] memory) {
+        return (shares[voter], votingHistory[voter]);
     }
 }
-}
-
-
-
 
 // contract VotingContract {
 //     mapping(address => uint256) public shares;
@@ -260,7 +315,7 @@ function getProposals() public view returns (
 //     function vote(uint256 proposalId, bool voteFor) public {
 //         require(shares[msg.sender] > 0, "No voting power.");
 //         require(proposals[proposalId].active, "Proposal inactive.");
-        
+
 //         if (voteFor) {
 //             proposals[proposalId].votesFor += shares[msg.sender];
 //         } else {
@@ -270,4 +325,3 @@ function getProposals() public view returns (
 // }
 
 // will work on the commented part
-
