@@ -9,6 +9,7 @@ contract VotingContract {
     // mapping(uint256 => Proposal) public proposals;
     mapping(address => VotingRecord[]) public votingHistory;
     mapping(uint256 => ProposalOutcome) public proposalOutcomes;
+    mapping(address => bool) public admins;
     uint256 public proposalCount;
     uint256 public totalShares;
 
@@ -65,9 +66,35 @@ contract VotingContract {
     );
     event RewardIssued(address voter, uint256 rewardAmount);
 
-    constructor(address _tokenAddress) {
-        governanceToken = GovernanceToken(_tokenAddress);
+    // constructor to initialize admins
+    constructor(address[] memory initialAdmins, address _tokenAddress) {
+            governanceToken = GovernanceToken(_tokenAddress);
+
+            for (uint i = 0; i < initialAdmins.length; i++) {
+                admins[initialAdmins[i]] = true;
+            }
+        }
+
+        modifier onlyAdmin() {
+        require(admins[msg.sender], "Only admins can perform this action");
+        _;
     }
+
+    function addAdmin(address newAdmin) public onlyAdmin {
+        admins[newAdmin] = true;
+    }
+
+    // Optional: Function to remove an admin dynamically
+    function removeAdmin(address admin) public onlyAdmin {
+        admins[admin] = false;
+    }
+
+    // check if the user is an admin
+    function isAdmin(address user) public view returns (bool) {
+        return admins[user];
+    }
+
+
     function registerShareholder(address voter, uint256 shareCount) public {
         require(
             !isVotingPeriodActive,
@@ -82,7 +109,7 @@ contract VotingContract {
         string memory description,
         uint256 durationInMinutes,
         QuorumType quorumType
-    ) public payable {
+    ) public payable onlyAdmin {
         // require(
         //     shares[msg.sender] * 100 / totalShares >= 5,
         //     "Sorry, you need to have over 5% to create a proposal"
