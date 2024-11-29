@@ -61,28 +61,27 @@ export default {
     // VotingProgress
   },
   data() {
-  return {
-    userProfile: null,
-    web3: null,
-    contract: null,
-    colors: [
-      "#FF6347", "#40E0D0", "#8A2BE2", "#FFD700", "#32CD32", "#FF1493", "#00BFFF"
-    ], 
-    currentColorIndex: 0,
-    headerStyle: {
-      transition: "color 1s ease-in-out, background 1s ease-in-out", 
-      color: "#333",
-      background: "linear-gradient(90deg, #FF6347, #40E0D0)", 
-    }
-  };
-},
+    return {
+      userProfile: null,
+      web3: null,
+      contract: null,
+      colors: [
+        "#FF6347", "#40E0D0", "#8A2BE2", "#FFD700", "#32CD32", "#FF1493", "#00BFFF"
+      ],
+      currentColorIndex: 0,
+      headerStyle: {
+        transition: "color 1s ease-in-out, background 1s ease-in-out",
+        color: "#333",
+        background: "linear-gradient(90deg, #FF6347, #40E0D0)",
+      }
+    };
+  },
   async created() {
     this.web3 = new Web3(window.ethereum);
     this.contract = this.getVotingContract(this.web3);
-    
+
     // Load user profile
     await this.loadUserProfile();
-    
     // Listen for account changes
     window.ethereum.on('accountsChanged', this.handleAccountChange);
   },
@@ -97,36 +96,102 @@ export default {
       console.log("votingAbi", votingAbi);
       return new web3.eth.Contract(contractABI, contractAddress);
     },
-    async loadUserProfile() {
-  try {
-    console.log("Attempting to load user profile...");
-    const accounts = await this.web3.eth.requestAccounts(); // Request wallet connection
-    console.log("Accounts:", accounts);
 
-    if (!accounts || accounts.length === 0) {
-      console.error("No accounts found. Ensure your wallet is connected.");
-      return;
+    async switchToHardhatNetwork() {
+  const network = {
+    chainId: '0x7A69', // 31337 in hexadecimal
+    chainName: 'Hardhat Network',
+    nativeCurrency: {
+      name: 'Ether',
+      symbol: 'ETH',
+      decimals: 18,
+    },
+    rpcUrls: ['http://127.0.0.1:8545'], // Hardhat RPC URL
+    blockExplorerUrls: ['https://explorer.hardhat.org'], // Optional block explorer
+  };
+
+  try {
+    const networkId = await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: '0x7A69' }] // 0x7A69 is the hex representation of 31337
+    });
+
+    if (networkId !== '0x7A69') {
+      console.log("Attempting to add Hardhat network...");
+      await window.ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [network],
+      });
+
+      // Add delay to allow MetaMask to process network change
+      await new Promise(resolve => setTimeout(resolve, 3000));
     }
 
-    const wallet = accounts[0]; // The wallet address of the logged-in user
-    console.log("User Wallet:", wallet);
+    // Try switching to the Hardhat network
+    await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: '0x7A69' }],
+    });
 
-    // Fetch the user's ETH balance in Wei and convert it to ETH
-    const balanceWei = await this.web3.eth.getBalance(wallet);
-    const balanceEth = this.web3.utils.fromWei(balanceWei, "ether");
-    console.log("ETH Balance:", balanceEth);
+    const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
 
-    // Set the user profile with wallet address and ETH balance
-    this.userProfile = {
-      name: wallet,
-      wallet,             
-      ethBalance: balanceEth 
-    };
-    console.log("User profile loaded:", this.userProfile);
+    if (currentChainId === '0x7A69') {
+      console.log('Successfully switched to Hardhat network (chain ID 31337)');
+    } else {
+      throw new Error('Failed to switch to Hardhat network');
+    }
   } catch (error) {
-    console.error("Error loading user profile:", error);
+    console.error('Error switching to Hardhat network:', error);
   }
-},
+}
+,
+    async loadUserProfile() {
+      try {
+        console.log("Attempting to load user profile...");
+        // const accounts = await this.web3.eth.requestAccounts(); // Request wallet connection
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        console.log("Accounts:", accounts);
+
+
+        const chainId = await this.web3.eth.getChainId();
+        if (chainId !== 31337) {
+          console.error("Please switch to the Hardhat network (chain ID 31337) in MetaMask.");
+          await this.switchToHardhatNetwork(); // Attempt to switch to Hardhat network
+          // Re-fetch the chain ID after attempting to switch
+          const newChainId = await this.web3.eth.getChainId();
+          if (newChainId !== 31337) {
+            // If still not on Hardhat network, exit
+            console.error("Failed to switch to the Hardhat network (chain ID 31337).");
+            return;
+          }
+        }
+        console.log("Connected to chain ID:", chainId);
+
+
+        if (!accounts || accounts.length === 0) {
+          console.error("No accounts found. Ensure your wallet is connected.");
+          return;
+        }
+
+        const wallet = accounts[0]; // The wallet address of the logged-in user
+        console.log("User Wallet:", wallet);
+
+        // Fetch the user's ETH balance in Wei and convert it to ETH
+        const balanceWei = await this.web3.eth.getBalance(wallet);
+        const balanceEth = this.web3.utils.fromWei(balanceWei, "ether");
+        console.log("ETH Balance:", balanceEth);
+
+        // Set the user profile with wallet address and ETH balance
+        this.userProfile = {
+          name: wallet,
+          wallet,
+          ethBalance: balanceEth
+        };
+        console.log("User profile loaded:", this.userProfile);
+      } catch (error) {
+        console.error("Error loading user profile:", error);
+      }
+    },
     // This method is called when the account changes
     async handleAccountChange(accounts) {
       if (accounts.length === 0) {
@@ -138,16 +203,16 @@ export default {
       }
     },
     startColorChangeInterval() {
-    setInterval(() => {
-      // Update color and gradient
-      this.currentColorIndex = (this.currentColorIndex + 1) % this.colors.length;
-      const newColor = this.colors[this.currentColorIndex];
+      setInterval(() => {
+        // Update color and gradient
+        this.currentColorIndex = (this.currentColorIndex + 1) % this.colors.length;
+        const newColor = this.colors[this.currentColorIndex];
 
-      // Set a new color and gradient for the title
-      this.headerStyle.color = newColor;
-      this.headerStyle.background = `linear-gradient(90deg, ${newColor}, #40E0D0)`;
-    }, Math.floor(Math.random() * (5000 - 2000 + 1)) + 2000); // Random interval between 2-5 seconds
-  },
+        // Set a new color and gradient for the title
+        this.headerStyle.color = newColor;
+        this.headerStyle.background = `linear-gradient(90deg, ${newColor}, #40E0D0)`;
+      }, Math.floor(Math.random() * (5000 - 2000 + 1)) + 2000); // Random interval between 2-5 seconds
+    },
   }
 };
 </script>

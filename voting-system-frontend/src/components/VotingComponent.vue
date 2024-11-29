@@ -36,9 +36,10 @@ export default {
             const web3 = new Web3(window.ethereum);
             const contract = this.getVotingContract(web3);
             try {
-                await contract.methods.castVote(proposalId, voteOption).send({ from:
-                    'eth_accounts[0]'
-                 });
+                await contract.methods.castVote(proposalId, voteOption).send({
+                    from:
+                        'eth_accounts[0]'
+                });
                 this.fetchProposals();
             } catch (err) {
                 console.error("Voting failed:", err);
@@ -57,48 +58,54 @@ export default {
             return new web3.eth.Contract(votingAbi.abi, contractAddress);
         },
         async fetchProposals() {
-    console.log("Fetching proposals Component VotingComponent");
-    const web3 = new Web3(window.ethereum);
-    try {
-        const contract = await this.getVotingContract(web3); 
-        const proposals = await contract.methods.getProposals().call();
-        console.log("got proposals:", proposals);
-
-        const { ids, titles, descriptions, votesForArray, votesAgainstArray, actives } = proposals;
-        const proposalsList = ids.map((id, index) => ({
-            id: id,
-            title: titles[index],
-            description: descriptions[index],
-            votesFor: votesForArray[index],
-            votesAgainst: votesAgainstArray[index],
-            active: actives[index]
-        }));
-
-        console.log('Proposals:', proposalsList);
-        this.proposals = proposalsList;  
-    } catch (error) {
-        console.error('Error fetching proposals:', error);
-    }
-}
-    },
-    mounted() {
-        console.log("Abi content my friend:", votingAbi.abi);
-    }
-    ,
-    async created() {
-        if (window.ethereum) {
+            console.log("Fetching proposals Component VotingComponent");
             const web3 = new Web3(window.ethereum);
             try {
-                await window.ethereum.request({ method: "eth_requestAccounts" });
-                this.fetchProposals();
-            } catch (err) {
-                console.error("Error connecting to wallet:", err);
-                alert("Wallet connection failed.");
+                const contract = await this.getVotingContract(web3);
+                const proposals = await contract.methods.getProposals().call();
+                console.log("got proposals:", proposals);
+
+                const { ids, titles, descriptions, votesForArray, votesAgainstArray, actives } = proposals;
+                const proposalsList = ids.map((id, index) => ({
+                    id: id,
+                    title: titles[index],
+                    description: descriptions[index],
+                    votesFor: votesForArray[index],
+                    votesAgainst: votesAgainstArray[index],
+                    active: actives[index],
+                    quorum: quorum[index],
+                }));
+                console.log('Proposals:', proposalsList);
+                this.proposals = proposalsList;
+            } catch (error) {
+                console.error('Error fetching proposals:', error);
             }
-        } else {
-            alert("Please install MetaMask to interact with this application.");
+        },
+
+        async initializeWallet() {
+            if (window.ethereum) {
+                const web3 = new Web3(window.ethereum);
+                try {
+                    await window.ethereum.request({ method: "eth_requestAccounts" });
+                    this.fetchProposals();
+                } catch (err) {
+                    console.error("Error connecting to wallet:", err);
+                    alert("Wallet connection failed.");
+                }
+            } else {
+                alert("Please install MetaMask to interact with this application.");
+            }
         }
     },
+    mounted() {
+        this.initializeWallet();
+        eventBus.on('newProposalCreated', this.fetchProposals);
+    },
+    beforeDestroy() {
+        // Remove event listener when the component is destroyed
+        eventBus.off('newProposalCreated', this.fetchProposals);
+    },
+
 
 };
 </script>

@@ -271,7 +271,8 @@ function getProposals() public view returns (
         string[] memory descriptions,
         uint256[] memory votesForArray,
         uint256[] memory votesAgainstArray,
-        bool[] memory actives
+        bool[] memory actives,
+        uint256[] memory quorum
     ) {
         // proposalCount = proposals.length;
 
@@ -281,6 +282,7 @@ function getProposals() public view returns (
         votesForArray = new uint256[](proposalCount);
         votesAgainstArray = new uint256[](proposalCount);
         actives = new bool[](proposalCount);
+        quorum = new uint256[](proposalCount);
 
         for (uint256 i = 0; i < proposalCount; i++) {
             Proposal storage proposal = proposals[i];
@@ -290,6 +292,7 @@ function getProposals() public view returns (
             votesForArray[i] = proposal.votesFor;
             votesAgainstArray[i] = proposal.votesAgainst;
             actives[i] = proposal.active;
+            quorum[i] = uint256(proposal.quorumType);
         }
     }
 
