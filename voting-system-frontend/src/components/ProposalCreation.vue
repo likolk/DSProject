@@ -34,7 +34,7 @@ export default {
   name: "ProposalCreation",
   data() {
     return {
-      isAdmin: false,
+      isAdmin: true,
       proposalTitle: "",
       proposalDescription: "",
       durationInMinutes: null,
@@ -59,9 +59,7 @@ export default {
   console.log("Selected Address isssissiisisisis:", selectedAddress);
 
   const initialAdmins = [
-        '0x71f13461195DaB07902cac189572a3d44d949253',
-        '0x92639568a4B35c4052A2243b51f75A3065104D8d',
-        '0xeD8A727F4A3447ba80Bd82Fcdc37121462A512De',
+        '0xdD2FD4581271e230360230F9337D5c0430Bf44C0',
     ];
 
   console.log("Initial Admins arereerreer:", initialAdmins);
@@ -91,46 +89,45 @@ export default {
   }
 },
 
+async createProposal() {
+  if (!this.proposalTitle || !this.proposalDescription) {
+    alert("Please provide a title and description for the proposal.");
+    return;
+  }
+  if (!this.durationInMinutes || this.durationInMinutes <= 0) {
+    alert("Please specify a valid duration in minutes.");
+    return;
+  }
+  if (this.quorumType === "") {
+    alert("Please select a quorum type.");
+    return;
+  }
 
-    async createProposal() {
-      if (!this.proposalTitle || !this.proposalDescription) {
-        alert("Please provide a title and description for the proposal.");
-        return;
-      }
-      if (!this.durationInMinutes || this.durationInMinutes <= 0) {
-        alert("Please specify a valid duration in minutes.");
-        return;
-      }
-      if (this.quorumType === "") {
-        alert("Please select a quorum type.");
-        return;
-      }
+  const web3 = new Web3(window.ethereum);
+  const contract = this.getVotingContract(web3);
 
-      const web3 = new Web3(window.ethereum);
-      const contract = this.getVotingContract(web3);
+  try {
+    const valueInWei = web3.utils.toWei('1', 'ether'); // Check if contract needs value
+    const receipt = await contract.methods.createProposal(
+      this.proposalTitle,
+      this.proposalDescription,
+      this.durationInMinutes,
+      this.quorumType
+    ).send({
+      from: window.ethereum.selectedAddress,
+      gas: 500000, // Add gas limit if necessary
+      value: valueInWei, // Include value only if required by your contract
+    });
 
+    console.log("Transaction receipt:", receipt); // Log the transaction receipt for debugging
+    eventBus.emit('newProposalCreated');
+    alert("Proposal created successfully!");
+  } catch (err) {
+    console.error("Error while creating proposal:", err);
+    alert("Failed to create proposal. Please check the console for more details.");
+  }
+},
 
-      const valueInWei = web3.utils.toWei('1', 'ether');
-
-      try {
-        await contract.methods
-          .createProposal(
-            this.proposalTitle,
-            this.proposalDescription,
-            this.durationInMinutes,
-            this.quorumType
-          )
-          .send({
-            from: window.ethereum.selectedAddress,
-            value: valueInWei, 
-          });
-        eventBus.emit('newProposalCreated');
-        alert("Proposal created successfully!");
-      } catch (err) {
-        alert("Failed to create proposal.");
-        console.error(err);
-      }
-    },
     getVotingContract(web3) {
       return new web3.eth.Contract(votingAbi.abi, address);
     },
