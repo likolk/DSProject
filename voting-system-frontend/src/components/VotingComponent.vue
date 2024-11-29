@@ -18,8 +18,9 @@
 <script>
 import { ref } from "vue";
 import Web3 from 'web3';
-import { eventBus } from '@/services/eventBus'; // Updated import
+import { eventBus } from '@/services/eventBus';
 import votingAbi from "../../../voting-system-smart-contracts/artifacts/contracts/smartContract.sol/VotingContract.json";
+import deployedAddress from "../../../voting-system-smart-contracts/scripts/deployedAddress.json";
 
 export default {
     name: "VotingComponent",
@@ -47,8 +48,10 @@ export default {
             const progress = await contract.methods.getVotingProgress().call();
             this.totalVotes = progress;
         },
-        getVotingContract(web3) {
-            const contractAddress = "0x0e87A7677961a8705bAf7ae7Cd01e8AD66D90645";
+        async getVotingContract(web3) {
+            console.log("Deployed Address JSON:", deployedAddress);
+            const contractAddress = deployedAddress.address;
+            console.log("Contract Address is finally:", contractAddress);
             return new web3.eth.Contract(votingAbi.abi, contractAddress);
         },
         async fetchProposals() {
@@ -74,6 +77,9 @@ export default {
                 return [];
             }
         }
+    },
+    mounted() {
+        console.log("Abi content my friend:", votingAbi.abi);
     }
     ,
     async created() {
@@ -93,6 +99,7 @@ export default {
     // beforeDestroy() {
     //     eventBus.off('newProposalCreated', this.fetchProposals);
     // }
+
 };
 </script>
 
@@ -153,6 +160,4 @@ h3 {
 .vote-status p {
     font-weight: bold;
 }
-
-
 </style>

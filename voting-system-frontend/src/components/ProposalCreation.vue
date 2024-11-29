@@ -54,13 +54,33 @@ export default {
   const contract = this.getVotingContract(web3, contractAddress);
   console.log("Contract object:", contract);
 
-  const initialAdmins = selectedAddress
 
-      if (selectedAddress === initialAdmins) {
-        console.log("Selected Address is an admin");
-        this.isAdmin = true;
-        return;
-    }
+
+  console.log("Selected Address isssissiisisisis:", selectedAddress);
+
+  const initialAdmins = [
+        '0x71f13461195DaB07902cac189572a3d44d949253',
+        '0x92639568a4B35c4052A2243b51f75A3065104D8d',
+        '0xeD8A727F4A3447ba80Bd82Fcdc37121462A512De',
+    ];
+
+  console.log("Initial Admins arereerreer:", initialAdmins);
+
+  const normalizedSelectedAddress = selectedAddress.toLowerCase().trim();
+  const normalizedInitialAdmins = initialAdmins.map(address => address.toLowerCase().trim());
+
+  console.log("Normalized Selected Address:", normalizedSelectedAddress);
+  console.log("Normalized Initial Admins:", normalizedInitialAdmins);
+
+  this.isAdmin = normalizedInitialAdmins.includes(normalizedSelectedAddress);
+
+  if (this.isAdmin) {
+    console.log("Selected Address is an admin.");
+    return;
+  } else {
+    console.log("Selected Address is not an admin.");
+  }
+
   try {
     const isAdmin = await contract.methods.isAdmin(selectedAddress).call();
     console.log("Admin check result:", isAdmin);
