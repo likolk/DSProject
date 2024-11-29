@@ -18,8 +18,9 @@
 <script>
 import { ref } from "vue";
 import Web3 from 'web3';
-import { eventBus } from '@/services/eventBus'; // Updated import
+import { eventBus } from '@/services/eventBus';
 import votingAbi from "../../../voting-system-smart-contracts/artifacts/contracts/smartContract.sol/VotingContract.json";
+import deployedAddress from "../../../voting-system-smart-contracts/scripts/deployedAddress.json";
 
 export default {
     name: "VotingComponent",
@@ -35,7 +36,9 @@ export default {
             const web3 = new Web3(window.ethereum);
             const contract = this.getVotingContract(web3);
             try {
-                await contract.methods.castVote(proposalId, voteOption).send({ from: window.ethereum.selectedAddress });
+                await contract.methods.castVote(proposalId, voteOption).send({ from:
+                    'eth_accounts[0]'
+                 });
                 this.fetchProposals();
             } catch (err) {
                 console.error("Voting failed:", err);
@@ -47,33 +50,39 @@ export default {
             const progress = await contract.methods.getVotingProgress().call();
             this.totalVotes = progress;
         },
-        getVotingContract(web3) {
-            const contractAddress = "0x0e87A7677961a8705bAf7ae7Cd01e8AD66D90645";
+        async getVotingContract(web3) {
+            console.log("Deployed Address JSON:", deployedAddress);
+            const contractAddress = deployedAddress.address;
+            console.log("Contract Address is finally:", contractAddress);
             return new web3.eth.Contract(votingAbi.abi, contractAddress);
         },
         async fetchProposals() {
-            const web3 = new Web3(window.ethereum);
-            const contract = this.getVotingContract(web3);
-            try {
-                const proposals = await contract.methods.getProposals().call();
-                console.log("got proposals:", proposals)
-                const { ids, titles, descriptions, votesForArray, votesAgainstArray, actives } = proposals;
-                const proposalsList = ids.map((id, index) => ({
-                    id: id,
-                    title: titles[index],
-                    description: descriptions[index],
-                    votesFor: votesForArray[index],
-                    votesAgainst: votesAgainstArray[index],
-                    active: actives[index]
-                }));
+    console.log("Fetching proposals Component VotingComponent");
+    const web3 = new Web3(window.ethereum);
+    try {
+        const contract = await this.getVotingContract(web3); 
+        const proposals = await contract.methods.getProposals().call();
+        console.log("got proposals:", proposals);
 
-                console.log('Proposals:', proposalsList);
-                return proposalsList;
-            } catch (error) {
-                console.error('Error fetching proposals:', error);
-                return [];
-            }
-        }
+        const { ids, titles, descriptions, votesForArray, votesAgainstArray, actives } = proposals;
+        const proposalsList = ids.map((id, index) => ({
+            id: id,
+            title: titles[index],
+            description: descriptions[index],
+            votesFor: votesForArray[index],
+            votesAgainst: votesAgainstArray[index],
+            active: actives[index]
+        }));
+
+        console.log('Proposals:', proposalsList);
+        this.proposals = proposalsList;  
+    } catch (error) {
+        console.error('Error fetching proposals:', error);
+    }
+}
+    },
+    mounted() {
+        console.log("Abi content my friend:", votingAbi.abi);
     }
     ,
     async created() {
@@ -90,9 +99,7 @@ export default {
             alert("Please install MetaMask to interact with this application.");
         }
     },
-    // beforeDestroy() {
-    //     eventBus.off('newProposalCreated', this.fetchProposals);
-    // }
+
 };
 </script>
 
@@ -153,6 +160,4 @@ h3 {
 .vote-status p {
     font-weight: bold;
 }
-
-
 </style>
