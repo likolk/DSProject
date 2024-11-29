@@ -22,16 +22,17 @@ contract VotingContract {
         Unanimous
     }
 
+
     struct Proposal {
-        string title;
-        string description;
-        uint256 votesFor;
-        uint256 votesAgainst;
-        bool active;
-        uint256 votingEndTime;
-        uint256 totalVotesCast;
-        QuorumType quorumType;
-    }
+            string title;
+            string description;
+            uint256 votesFor;
+            uint256 votesAgainst;
+            bool active;
+            uint256 votingEndTime;
+            uint256 totalVotesCast;
+            QuorumType quorumType;
+        }
 
     Proposal[] public proposals;
 
@@ -264,38 +265,48 @@ contract VotingContract {
         return proposalCount;
     }
 
-    function getProposals()
-        public
-        view
-        returns (
-            uint[] memory ids,
-            string[] memory titles,
-            string[] memory descriptions,
-            uint[] memory votesForArray,
-            uint[] memory votesAgainstArray,
-            bool[] memory actives
-        )
-    {
-        uint256 count = proposals.length;
+function getProposals() public view returns (
+        uint256[] memory ids,
+        string[] memory titles,
+        string[] memory descriptions,
+        uint256[] memory votesForArray,
+        uint256[] memory votesAgainstArray,
+        bool[] memory actives
+    ) {
+        // proposalCount = proposals.length;
 
-        // Initialize arrays to hold the proposal details
-        ids = new uint256[](count);
-        titles = new string[](count);
-        descriptions = new string[](count);
-        votesForArray = new uint256[](count);
-        votesAgainstArray = new uint256[](count);
-        actives = new bool[](count);
+        ids = new uint256[](proposalCount);
+        titles = new string[](proposalCount);
+        descriptions = new string[](proposalCount);
+        votesForArray = new uint256[](proposalCount);
+        votesAgainstArray = new uint256[](proposalCount);
+        actives = new bool[](proposalCount);
 
-        // Loop through each proposal and store its details in the arrays
-        for (uint256 i = 0; i < count; i++) {
+        for (uint256 i = 0; i < proposalCount; i++) {
+            Proposal storage proposal = proposals[i];
             ids[i] = i;
-            titles[i] = proposals[i].title;
-            descriptions[i] = proposals[i].description;
-            votesForArray[i] = proposals[i].votesFor;
-            votesAgainstArray[i] = proposals[i].votesAgainst;
-            actives[i] = proposals[i].active;
+            titles[i] = proposal.title;
+            descriptions[i] = proposal.description;
+            votesForArray[i] = proposal.votesFor;
+            votesAgainstArray[i] = proposal.votesAgainst;
+            actives[i] = proposal.active;
         }
     }
+
+    function addProposal(string memory _title, string memory _description) public {
+        proposals.push(Proposal({
+            title: _title,
+            description: _description,
+            votesFor: 0,
+            votesAgainst: 0,
+            active: true,
+            votingEndTime: block.timestamp + 7 days, 
+            totalVotesCast: 0,
+            quorumType: QuorumType.SimpleMajority
+
+        }));
+    }
+
 
     function getTotalSharesVoted(
         uint256 proposalId

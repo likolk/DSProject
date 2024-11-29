@@ -36,7 +36,9 @@ export default {
             const web3 = new Web3(window.ethereum);
             const contract = this.getVotingContract(web3);
             try {
-                await contract.methods.castVote(proposalId, voteOption).send({ from: window.ethereum.selectedAddress });
+                await contract.methods.castVote(proposalId, voteOption).send({ from:
+                    'eth_accounts[0]'
+                 });
                 this.fetchProposals();
             } catch (err) {
                 console.error("Voting failed:", err);
@@ -55,28 +57,29 @@ export default {
             return new web3.eth.Contract(votingAbi.abi, contractAddress);
         },
         async fetchProposals() {
-            const web3 = new Web3(window.ethereum);
-            const contract = this.getVotingContract(web3);
-            try {
-                const proposals = await contract.methods.getProposals().call();
-                console.log("got proposals:", proposals)
-                const { ids, titles, descriptions, votesForArray, votesAgainstArray, actives } = proposals;
-                const proposalsList = ids.map((id, index) => ({
-                    id: id,
-                    title: titles[index],
-                    description: descriptions[index],
-                    votesFor: votesForArray[index],
-                    votesAgainst: votesAgainstArray[index],
-                    active: actives[index]
-                }));
+    console.log("Fetching proposals Component VotingComponent");
+    const web3 = new Web3(window.ethereum);
+    try {
+        const contract = await this.getVotingContract(web3); 
+        const proposals = await contract.methods.getProposals().call();
+        console.log("got proposals:", proposals);
 
-                console.log('Proposals:', proposalsList);
-                return proposalsList;
-            } catch (error) {
-                console.error('Error fetching proposals:', error);
-                return [];
-            }
-        }
+        const { ids, titles, descriptions, votesForArray, votesAgainstArray, actives } = proposals;
+        const proposalsList = ids.map((id, index) => ({
+            id: id,
+            title: titles[index],
+            description: descriptions[index],
+            votesFor: votesForArray[index],
+            votesAgainst: votesAgainstArray[index],
+            active: actives[index]
+        }));
+
+        console.log('Proposals:', proposalsList);
+        this.proposals = proposalsList;  
+    } catch (error) {
+        console.error('Error fetching proposals:', error);
+    }
+}
     },
     mounted() {
         console.log("Abi content my friend:", votingAbi.abi);
@@ -96,9 +99,6 @@ export default {
             alert("Please install MetaMask to interact with this application.");
         }
     },
-    // beforeDestroy() {
-    //     eventBus.off('newProposalCreated', this.fetchProposals);
-    // }
 
 };
 </script>
