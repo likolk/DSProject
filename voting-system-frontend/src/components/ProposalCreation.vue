@@ -124,7 +124,6 @@ export default {
             from: window.ethereum.selectedAddress,
             value: valueInWei, 
           });
-        // Emit event to notify VotingComponent to fetch proposals
         eventBus.emit('newProposalCreated');
         alert("Proposal created successfully!");
       } catch (err) {
