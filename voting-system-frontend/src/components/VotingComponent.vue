@@ -32,7 +32,8 @@
       };
     },
     mounted() {
-        console.log("abi content:",  votingAbi.abi);
+      console.log("ABI content:", votingAbi.abi);
+      console.log("Deployed Address:", deployedAddress.address);
       this.initializeWallet();
       eventBus.on('newProposalCreated', this.fetchProposals); // Listen for the event
     },
@@ -61,17 +62,17 @@
         const contract = new ethers.Contract(deployedAddress.address, votingAbi.abi, provider);
         try {
           console.log("Calling getProposals()");
-          const proposals = await contract.getProposals({ gasLimit: 500000 }); // Specify gas limit
+          const proposals = await contract.getProposals();
           console.log("Proposals fetched:", proposals);
   
           const proposalsList = proposals.map((proposal, index) => ({
             id: index,
             title: proposal.title,
             description: proposal.description,
-            votesFor: proposal.votesFor.toString(), // Assuming BigNumber is returned
-            votesAgainst: proposal.votesAgainst.toString(), // Assuming BigNumber is returned
+            votesFor: proposal.votesFor ? proposal.votesFor.toString() : "0", // Assuming BigNumber is returned
+            votesAgainst: proposal.votesAgainst ? proposal.votesAgainst.toString() : "0", // Assuming BigNumber is returned
             active: proposal.active,
-            votingEndTime: proposal.votingEndTime.toString(), // If it's a timestamp
+            votingEndTime: proposal.votingEndTime ? proposal.votingEndTime.toString() : "0", // If it's a timestamp
             quorumType: proposal.quorumType,
           }));
   

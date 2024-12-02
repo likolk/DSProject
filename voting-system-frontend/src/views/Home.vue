@@ -10,7 +10,7 @@
         <p><strong>ETH Balance:</strong> {{ userProfile.ethBalance }} ETH</p>
       </div>
       <div v-else>
-        <button @click="loadUserProfile">Connect Wallet</button>
+        <button @click="loadUserProfile" class="cta-button">Connect Wallet</button>
       </div>
     </section>
 
@@ -33,21 +33,14 @@
       <h2>Voting History</h2>
       <VotingHistoryDashboard />
     </section>
-
-    <!-- <section class="card">
-      <h2>Voting Progress</h2>
-      <VotingProgress />
-    </section> -->
   </div>
 </template>
-
 
 <script>
 import ShareholderRegistration from "@/components/ShareholderRegistration.vue";
 import VotingComponent from "@/components/VotingComponent.vue";
 import ProposalCreation from "@/components/ProposalCreation.vue";
 import VotingHistoryDashboard from "@/components/VotingHistoryDashboard.vue";
-// import VotingProgress from "@/components/VotingProgress.vue";
 import Web3 from "web3";
 import votingAbi from "../../../voting-system-smart-contracts/artifacts/contracts/smartContract.sol/VotingContract.json";
 
@@ -58,7 +51,6 @@ export default {
     VotingComponent,
     ProposalCreation,
     VotingHistoryDashboard,
-    // VotingProgress
   },
   data() {
     return {
@@ -66,13 +58,13 @@ export default {
       web3: null,
       contract: null,
       colors: [
-        "#FF6347", "#40E0D0", "#8A2BE2", "#FFD700", "#32CD32", "#FF1493", "#00BFFF"
+        "#4A90E2", "#50E3C2", "#B8E986", "#F5A623", "#D0021B", "#9013FE", "#8B572A"
       ],
       currentColorIndex: 0,
       headerStyle: {
         transition: "color 1s ease-in-out, background 1s ease-in-out",
         color: "#333",
-        background: "linear-gradient(90deg, #FF6347, #40E0D0)",
+        background: "linear-gradient(90deg, #4A90E2, #50E3C2)",
       }
     };
   },
@@ -100,17 +92,14 @@ export default {
     async loadUserProfile() {
       try {
         console.log("Attempting to load user profile...");
-        // const accounts = await this.web3.eth.requestAccounts(); // Request wallet connection
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         console.log("Accounts:", accounts);
-
 
         const chainId = await this.web3.eth.getChainId();
         if (parseInt(chainId) !== 31337) {
           console.error("Please switch to the Hardhat network (chain ID 31337) in MetaMask.");
         }
         console.log("Connected to chain ID:", chainId);
-
 
         if (!accounts || accounts.length === 0) {
           console.error("No accounts found. Ensure your wallet is connected.");
@@ -154,7 +143,7 @@ export default {
 
         // Set a new color and gradient for the title
         this.headerStyle.color = newColor;
-        this.headerStyle.background = `linear-gradient(90deg, ${newColor}, #40E0D0)`;
+        this.headerStyle.background = `linear-gradient(90deg, ${newColor}, #50E3C2)`;
       }, Math.floor(Math.random() * (5000 - 2000 + 1)) + 2000); // Random interval between 2-5 seconds
     },
   }
@@ -165,7 +154,7 @@ export default {
 .home {
   font-family: "Arial", sans-serif;
   padding: 20px;
-  background-color: #00eee6;
+  background: linear-gradient(135deg, #4A90E2, #50E3C2);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -174,15 +163,19 @@ export default {
 
 h1 {
   text-align: center;
-  font-size: 2.5rem;
-  color: #333;
+  font-size: 3rem;
+  color: #fff;
   margin-bottom: 40px;
   font-weight: 700;
   letter-spacing: 1px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #4A90E2, #50E3C2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 section.card {
-  background-color: white;
+  background: linear-gradient(135deg, #ffffff, #f1f1f1);
   border-radius: 10px;
   padding: 20px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -198,9 +191,12 @@ section.card:hover {
 
 section h2 {
   margin-bottom: 15px;
-  font-size: 1.5rem;
-  color: #4a90e2;
+  font-size: 1.8rem;
+  color: #4A90E2;
   font-weight: 600;
+  text-align: center;
+  border-bottom: 2px solid #4A90E2;
+  padding-bottom: 10px;
 }
 
 .profile-card {
@@ -208,11 +204,12 @@ section h2 {
   border-radius: 8px;
   padding: 15px;
   background: #f9f9f9;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .profile-card h3 {
   font-size: 1.5rem;
-  color: #4a90e2;
+  color: #4A90E2;
   margin-bottom: 10px;
 }
 
@@ -220,5 +217,20 @@ section h2 {
   font-size: 1rem;
   color: #555;
   margin: 5px 0;
+}
+
+.cta-button {
+  padding: 15px 30px;
+  font-size: 1.2rem;
+  color: white;
+  background-color: #4A90E2;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.cta-button:hover {
+  background-color: #357ABD;
 }
 </style>

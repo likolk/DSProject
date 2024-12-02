@@ -1,23 +1,25 @@
 <template>
-  <div v-if="isAdmin">
-    <h3>Create Proposal</h3>
-    <div class="input-container">
-      <input v-model="proposalTitle" placeholder="Proposal Title" class="input-field" />
-      <textarea v-model="proposalDescription" placeholder="Proposal Description" class="input-field"></textarea>
-      <input v-model.number="durationInMinutes" type="number" placeholder="Duration (in minutes)" class="input-field" />
-      <select v-model="quorumType" class="input-field">
-        <option disabled value="">Select Quorum Type</option>
-        <option value="0">Simple Majority</option>
-        <option value="1">Two-Thirds Majority</option>
-        <option value="2">Three-Quarters Majority</option>
-        <option value="3">Unanimous Majority</option>
-      </select>
+  <div class="proposal-creation">
+    <div v-if="isAdmin">
+      <h3>Create Proposal</h3>
+      <div class="input-container">
+        <input v-model="proposalTitle" placeholder="Proposal Title" class="input-field" />
+        <textarea v-model="proposalDescription" placeholder="Proposal Description" class="input-field"></textarea>
+        <input v-model.number="durationInMinutes" type="number" placeholder="Duration (in minutes)" class="input-field" />
+        <select v-model="quorumType" class="input-field">
+          <option disabled value="">Select Quorum Type</option>
+          <option value="0">Simple Majority</option>
+          <option value="1">Two-Thirds Majority</option>
+          <option value="2">Three-Quarters Majority</option>
+          <option value="3">Unanimous Majority</option>
+        </select>
+      </div>
+      <button @click="createProposal" class="create-button">Create Proposal</button>
     </div>
-    <button @click="createProposal" class="create-button">Create Proposal</button>
-  </div>
 
-  <div v-else>
-    <p>You do not have permission to create proposals.</p>
+    <div v-else>
+      <p>You do not have permission to create proposals.</p>
+    </div>
   </div>
 </template>
 
@@ -127,11 +129,25 @@ export default {
 </script>
 
 <style scoped>
+.proposal-creation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
 h3 {
   text-align: center;
   margin-bottom: 20px;
-  font-size: 24px;
+  font-size: 2rem;
   color: #333;
+  font-weight: 700;
+  letter-spacing: 1px;
 }
 
 .input-container {
@@ -151,6 +167,7 @@ h3 {
   border: 1px solid #ddd;
   margin-top: 10px;
   outline: none;
+  transition: border-color 0.3s;
 }
 
 .input-field:focus {
@@ -165,12 +182,25 @@ h3 {
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, transform 0.3s;
   width: 80%;
   max-width: 600px;
 }
 
 .create-button:hover {
   background-color: #218838;
+  transform: translateY(-2px);
+}
+
+.create-button:active {
+  background-color: #1e7e34;
+  transform: translateY(0);
+}
+
+p {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #ff0000;
+  font-weight: 600;
 }
 </style>
