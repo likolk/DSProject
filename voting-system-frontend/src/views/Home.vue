@@ -97,54 +97,6 @@ export default {
       return new web3.eth.Contract(contractABI, contractAddress);
     },
 
-    async switchToHardhatNetwork() {
-  const network = {
-    chainId: '0x7A69', // 31337 in hexadecimal
-    chainName: 'Hardhat Network',
-    nativeCurrency: {
-      name: 'Ether',
-      symbol: 'ETH',
-      decimals: 18,
-    },
-    rpcUrls: ['http://127.0.0.1:8545'], // Hardhat RPC URL
-    blockExplorerUrls: ['https://explorer.hardhat.org'], // Optional block explorer
-  };
-
-  try {
-    const networkId = await window.ethereum.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: '0x7A69' }] // 0x7A69 is the hex representation of 31337
-    });
-
-    if (networkId !== '0x7A69') {
-      console.log("Attempting to add Hardhat network...");
-      await window.ethereum.request({
-        method: 'wallet_addEthereumChain',
-        params: [network],
-      });
-
-      // Add delay to allow MetaMask to process network change
-      await new Promise(resolve => setTimeout(resolve, 3000));
-    }
-
-    // Try switching to the Hardhat network
-    await window.ethereum.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: '0x7A69' }],
-    });
-
-    const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
-
-    if (currentChainId === '0x7A69') {
-      console.log('Successfully switched to Hardhat network (chain ID 31337)');
-    } else {
-      throw new Error('Failed to switch to Hardhat network');
-    }
-  } catch (error) {
-    console.error('Error switching to Hardhat network:', error);
-  }
-}
-,
     async loadUserProfile() {
       try {
         console.log("Attempting to load user profile...");
@@ -154,16 +106,8 @@ export default {
 
 
         const chainId = await this.web3.eth.getChainId();
-        if (chainId !== 31337) {
+        if (parseInt(chainId) !== 31337) {
           console.error("Please switch to the Hardhat network (chain ID 31337) in MetaMask.");
-          await this.switchToHardhatNetwork(); // Attempt to switch to Hardhat network
-          // Re-fetch the chain ID after attempting to switch
-          const newChainId = await this.web3.eth.getChainId();
-          if (newChainId !== 31337) {
-            // If still not on Hardhat network, exit
-            console.error("Failed to switch to the Hardhat network (chain ID 31337).");
-            return;
-          }
         }
         console.log("Connected to chain ID:", chainId);
 
