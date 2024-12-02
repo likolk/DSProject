@@ -106,7 +106,7 @@ export default {
 
 
         const chainId = await this.web3.eth.getChainId();
-        if (chainId !== 31337) {
+        if (parseInt(chainId) !== 31337) {
           console.error("Please switch to the Hardhat network (chain ID 31337) in MetaMask.");
         }
         console.log("Connected to chain ID:", chainId);

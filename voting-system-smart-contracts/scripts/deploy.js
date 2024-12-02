@@ -1,3 +1,4 @@
+const { ethers } = require("hardhat");
 const fs = require('fs');
 const path = require('path');
 
@@ -7,29 +8,20 @@ async function main() {
 
     // Ensure you pass both arguments: the array of initial admins and the token address
     const initialAdmins = [
-        '0x71f13461195DaB07902cac189572a3d44d949253',
-        '0x92639568a4B35c4052A2243b51f75A3065104D8d',
-        '0xeD8A727F4A3447ba80Bd82Fcdc37121462A512De',
+        '0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e',
     ];
 
-    // Replace this with the actual token address (ensure it's a valid address)
-    const tokenAddress = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'; 
+    const tokenAddress = '0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199';  // Replace with actual token address
 
-
-    const votingContract = await ethers.getContractFactory("VotingContract");
+    const VotingContract = await ethers.getContractFactory("VotingContract");
 
     // Deploy the contract with both the initialAdmins array and the token address
-    const votingAdmin = await votingContract.deploy(initialAdmins, tokenAddress);
-    console.log("Voting contract deployed to:", votingAdmin.target);
+    const votingContract = await VotingContract.deploy(initialAdmins, tokenAddress);
+    console.log("Voting contract deployed to:", votingContract.address);
 
-    const contractAddress = { address: votingAdmin.target };
+    const contractAddress = { address: votingContract.address };
     fs.writeFileSync(path.join(__dirname, 'deployedAddress.json'), JSON.stringify(contractAddress));
     console.log('Contract address written to deployedAddress.json');
-
-
-
-
-    
 }
 
 main().catch((error) => {
