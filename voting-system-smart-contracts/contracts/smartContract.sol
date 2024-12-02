@@ -85,6 +85,57 @@ contract VotingContract {
         admins[newAdmin] = true;
     }
 
+    // function get proposals, based on this 
+    /*
+    async fetchProposals() {
+    console.log("Fetching proposals in VotingComponent");
+    const web3 = new Web3(window.ethereum);
+    try {
+        console.log("Step 1")
+        const contract = await this.getVotingContract(web3);
+        console.log("Step 2")
+        const proposals = await contract.methods.getProposals().call();
+        // JavaScript code
+
+        // You can now access each proposal's attributes:
+        proposals.forEach(proposal => {
+        console.log(proposal.title);
+        console.log(proposal.description);
+        console.log(proposal.votesFor);
+        console.log(proposal.votesAgainst);
+        console.log(proposal.active);
+        console.log(proposal.votingEndTime);
+        console.log(proposal.quorumType);
+        });
+
+
+        console.log("Step 3")
+        console.log("Fetched proposals:", proposals);
+
+        const { ids, titles, descriptions, votesForArray, votesAgainstArray, actives } = proposals;
+        console.log("Step 4")
+        const proposalsList = ids.map((id, index) => ({
+            id: id,
+            title: titles[index],
+            description: descriptions[index],
+            votesFor: votesForArray[index],
+            votesAgainst: votesAgainstArray[index],
+            active: actives[index],
+        }));
+        console.log("Step 5")
+        console.log('Proposals:', proposalsList);
+        this.proposals = proposalsList;
+    } catch (error) {
+        console.error('Error fetching proposals:', error);
+    }
+},*/
+
+    function getProposals() public view returns (Proposal[] memory) {
+        return proposals;
+    }
+    
+    
+
     // Optional: Function to remove an admin dynamically
     function removeAdmin(address admin) public onlyAdmin {
         admins[admin] = false;
@@ -264,38 +315,6 @@ contract VotingContract {
     function getProposalsCount() public view returns (uint256) {
         return proposalCount;
     }
-
-function getProposals() public view returns (
-        uint256[] memory ids,
-        string[] memory titles,
-        string[] memory descriptions,
-        uint256[] memory votesForArray,
-        uint256[] memory votesAgainstArray,
-        bool[] memory actives,
-        uint256[] memory quorum
-    ) {
-        // proposalCount = proposals.length;
-
-        ids = new uint256[](proposalCount);
-        titles = new string[](proposalCount);
-        descriptions = new string[](proposalCount);
-        votesForArray = new uint256[](proposalCount);
-        votesAgainstArray = new uint256[](proposalCount);
-        actives = new bool[](proposalCount);
-        quorum = new uint256[](proposalCount);
-
-        for (uint256 i = 0; i < proposalCount; i++) {
-            Proposal storage proposal = proposals[i];
-            ids[i] = i;
-            titles[i] = proposal.title;
-            descriptions[i] = proposal.description;
-            votesForArray[i] = proposal.votesFor;
-            votesAgainstArray[i] = proposal.votesAgainst;
-            actives[i] = proposal.active;
-            quorum[i] = uint256(proposal.quorumType);
-        }
-    }
-
     function addProposal(string memory _title, string memory _description) public {
         proposals.push(Proposal({
             title: _title,

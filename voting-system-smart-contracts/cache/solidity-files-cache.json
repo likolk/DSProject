@@ -268,8 +268,8 @@
       ]
     },
     "/Users/cuenc/Documents/DSProject/voting-system-smart-contracts/contracts/smartContract.sol": {
-      "lastModificationDate": 1732878244096,
-      "contentHash": "77aad8f50413ccb8fe034d013137b5db",
+      "lastModificationDate": 1733146400196,
+      "contentHash": "3efacc81af233ed988d12e8cb8eb4a48",
       "sourceName": "contracts/smartContract.sol",
       "solcConfig": {
         "version": "0.8.20",

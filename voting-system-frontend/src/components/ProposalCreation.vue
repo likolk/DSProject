@@ -59,7 +59,7 @@ export default {
   console.log("Selected Address isssissiisisisis:", selectedAddress);
 
   const initialAdmins = [
-        '0xdD2FD4581271e230360230F9337D5c0430Bf44C0',
+        '0x8626f6940e2eb28930efb4cef49b2d1f2c9c1199',
     ];
 
   console.log("Initial Admins arereerreer:", initialAdmins);
@@ -120,13 +120,15 @@ async createProposal() {
     });
 
     console.log("Transaction receipt:", receipt); // Log the transaction receipt for debugging
+    // Emit event when the proposal is successfully created
     eventBus.emit('newProposalCreated');
     alert("Proposal created successfully!");
   } catch (err) {
     console.error("Error while creating proposal:", err);
     alert("Failed to create proposal. Please check the console for more details.");
   }
-},
+}
+,
 
     getVotingContract(web3) {
       return new web3.eth.Contract(votingAbi.abi, address);
