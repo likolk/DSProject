@@ -13,13 +13,14 @@
     "@nomicfoundation/hardhat-ethers": "^3.0.8",
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@typechain/hardhat": "^9.1.0",
+    "ethers": "^6.13.4",
     "hardhat": "^2.22.16"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.1.0",
-    "ethers": "^6.13.4",
     "fs": "^0.0.1-security",
-    "glob": "^7.2.0"
+    "glob": "^7.2.0",
+    "toolbox": "^0.1.1"
   },
   "directories": {
     "test": "test"

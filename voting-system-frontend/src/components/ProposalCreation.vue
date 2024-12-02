@@ -19,16 +19,13 @@
   <div v-else>
     <p>You do not have permission to create proposals.</p>
   </div>
-
 </template>
 
 <script>
-import { ref } from "vue";
-import Web3 from "web3";
+import { ethers } from "ethers"; 
 import votingAbi from "../../../voting-system-smart-contracts/artifacts/contracts/smartContract.sol/VotingContract.json";
 import { eventBus } from '@/services/eventBus';
-import { address } from "../../../voting-system-smart-contracts/scripts/deployedAddress.json";
-
+import deployedAddress from "../../../voting-system-smart-contracts/scripts/deployedAddress.json";
 
 export default {
   name: "ProposalCreation",
@@ -39,6 +36,7 @@ export default {
       proposalDescription: "",
       durationInMinutes: null,
       quorumType: "",
+      contractAddress: deployedAddress.address,
     };
   },
   methods: {
@@ -46,97 +44,84 @@ export default {
       const accounts = await window.ethereum.request({ method: 'eth_accounts' });
       const selectedAddress = accounts[0]; 
       console.log("Selected Address:", selectedAddress);
-      const web3 = new Web3(window.ethereum);
 
-  const contractAddress = address;
-  console.log("Contract Address: ", contractAddress);
+      const provider = new ethers.providers.Web3Provider(window.ethereum); 
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(this.contractAddress, votingAbi.abi, signer);
+      console.log("Contract object:", contract);
 
-  const contract = this.getVotingContract(web3, contractAddress);
-  console.log("Contract object:", contract);
+      const initialAdmins = [
+        '0xdD2FD4581271e230360230F9337D5c0430Bf44C0',
+        '0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199'
+      ];
 
+      const normalizedSelectedAddress = selectedAddress.toLowerCase().trim();
+      const normalizedInitialAdmins = initialAdmins.map(address => address.toLowerCase().trim());
 
+      console.log("Normalized Selected Address:", normalizedSelectedAddress);
+      console.log("Normalized Initial Admins:", normalizedInitialAdmins);
 
-  console.log("Selected Address isssissiisisisis:", selectedAddress);
+      this.isAdmin = normalizedInitialAdmins.includes(normalizedSelectedAddress);
 
-  const initialAdmins = [
-        '0x8626f6940e2eb28930efb4cef49b2d1f2c9c1199',
-    ];
+      if (this.isAdmin) {
+        console.log("Selected Address is an admin.");
+        return;
+      } else {
+        console.log("Selected Address is not an admin.");
+      }
 
-  console.log("Initial Admins arereerreer:", initialAdmins);
-
-  const normalizedSelectedAddress = selectedAddress.toLowerCase().trim();
-  const normalizedInitialAdmins = initialAdmins.map(address => address.toLowerCase().trim());
-
-  console.log("Normalized Selected Address:", normalizedSelectedAddress);
-  console.log("Normalized Initial Admins:", normalizedInitialAdmins);
-
-  this.isAdmin = normalizedInitialAdmins.includes(normalizedSelectedAddress);
-
-  if (this.isAdmin) {
-    console.log("Selected Address is an admin.");
-    return;
-  } else {
-    console.log("Selected Address is not an admin.");
-  }
-
-  try {
-    const isAdmin = await contract.methods.isAdmin(selectedAddress).call();
-    console.log("Admin check result:", isAdmin);
-    this.isAdmin = isAdmin;
-  } catch (error) {
-    console.error("Error checking admin status:", error);
-    this.isAdmin = false;
-  }
-},
-
-async createProposal() {
-  if (!this.proposalTitle || !this.proposalDescription) {
-    alert("Please provide a title and description for the proposal.");
-    return;
-  }
-  if (!this.durationInMinutes || this.durationInMinutes <= 0) {
-    alert("Please specify a valid duration in minutes.");
-    return;
-  }
-  if (this.quorumType === "") {
-    alert("Please select a quorum type.");
-    return;
-  }
-
-  const web3 = new Web3(window.ethereum);
-  const contract = this.getVotingContract(web3);
-
-  try {
-    const valueInWei = web3.utils.toWei('1', 'ether'); // Check if contract needs value
-    const receipt = await contract.methods.createProposal(
-      this.proposalTitle,
-      this.proposalDescription,
-      this.durationInMinutes,
-      this.quorumType
-    ).send({
-      from: window.ethereum.selectedAddress,
-      gas: 500000, // Add gas limit if necessary
-      value: valueInWei, // Include value only if required by your contract
-    });
-
-    console.log("Transaction receipt:", receipt); // Log the transaction receipt for debugging
-    // Emit event when the proposal is successfully created
-    eventBus.emit('newProposalCreated');
-    alert("Proposal created successfully!");
-  } catch (err) {
-    console.error("Error while creating proposal:", err);
-    alert("Failed to create proposal. Please check the console for more details.");
-  }
-}
-,
-
-    getVotingContract(web3) {
-      return new web3.eth.Contract(votingAbi.abi, address);
+      try {
+        const isAdmin = await contract.isAdmin(selectedAddress);
+        console.log("Admin check result:", isAdmin);
+        this.isAdmin = isAdmin;
+      } catch (error) {
+        console.error("Error checking admin status:", error);
+        this.isAdmin = false;
+      }
     },
-  },
-  mounted() {
 
-    this.checkAdminStatus();
+    async createProposal() {
+      if (!this.proposalTitle || !this.proposalDescription) {
+        alert("Please provide a title and description for the proposal.");
+        return;
+      }
+      if (!this.durationInMinutes || this.durationInMinutes <= 0) {
+        alert("Please specify a valid duration in minutes.");
+        return;
+      }
+      if (this.quorumType === "") {
+        alert("Please select a quorum type.");
+        return;
+      }
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(this.contractAddress, votingAbi.abi, signer);
+
+      try {
+        const valueInWei = ethers.utils.parseEther('1'); // Convert 1 ETH to Wei using ethers
+
+        const tx = await contract.createProposal(
+          this.proposalTitle,
+          this.proposalDescription,
+          this.durationInMinutes,
+          this.quorumType,
+          { value: valueInWei, gasLimit: 500000 }
+        );
+
+        console.log("Transaction receipt:", tx); // Log the transaction receipt for debugging
+        // Emit event when the proposal is successfully created
+        eventBus.emit('newProposalCreated');
+        alert("Proposal created successfully!");
+      } catch (err) {
+        console.error("Error while creating proposal:", err);
+        alert("Failed to create proposal. Please check the console for more details.");
+      }
+    }
+  },
+
+  async mounted() {
+    await this.checkAdminStatus();
   },
 };
 </script>

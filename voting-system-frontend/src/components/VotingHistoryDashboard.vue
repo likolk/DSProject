@@ -43,7 +43,7 @@ export default {
       const accounts = await this.web3.eth.getAccounts();
       this.account = accounts[0];
       this.contract = this.getVotingContract();
-      this.fetchVotingHistory();
+      // this.fetchVotingHistory();
     },
 
     async fetchVotingHistory() {
