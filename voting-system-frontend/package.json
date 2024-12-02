@@ -9,6 +9,8 @@
     "@headlessui/vue": "^1.7.23",
     "@heroicons/vue": "^2.2.0",
     "axios": "^1.7.7",
+    "chart.js": "^4.4.7",
+    "chartjs": "^0.3.24",
     "core-js": "^3.8.3",
     "dotenv": "^16.4.5",
     "ethers": "^5.7.0",

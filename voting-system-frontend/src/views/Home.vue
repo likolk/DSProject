@@ -33,6 +33,11 @@
       <h2>Voting History</h2>
       <VotingHistoryDashboard />
     </section>
+
+    <section class="card">
+      <h2>Voting Statistics</h2>
+      <canvas id="votingChart"></canvas>
+    </section>
   </div>
 </template>
 
@@ -43,6 +48,7 @@ import ProposalCreation from "@/components/ProposalCreation.vue";
 import VotingHistoryDashboard from "@/components/VotingHistoryDashboard.vue";
 import Web3 from "web3";
 import votingAbi from "../../../voting-system-smart-contracts/artifacts/contracts/smartContract.sol/VotingContract.json";
+import Chart from "chart.js/auto";
 
 export default {
   name: "Home",
@@ -76,6 +82,9 @@ export default {
     await this.loadUserProfile();
     // Listen for account changes
     window.ethereum.on('accountsChanged', this.handleAccountChange);
+
+    // Initialize chart
+    this.initializeChart();
   },
   beforeDestroy() {
     // Remove the event listener when the component is destroyed
@@ -145,6 +154,35 @@ export default {
         this.headerStyle.color = newColor;
         this.headerStyle.background = `linear-gradient(90deg, ${newColor}, #50E3C2)`;
       }, Math.floor(Math.random() * (5000 - 2000 + 1)) + 2000); // Random interval between 2-5 seconds
+    },
+    initializeChart() {
+      const ctx = document.getElementById('votingChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Proposal 1', 'Proposal 2', 'Proposal 3'],
+          datasets: [
+            {
+              label: 'Votes For',
+              data: [100, 50, 30],
+              backgroundColor: '#4A90E2',
+            },
+            {
+              label: 'Votes Against',
+              data: [20, 70, 10],
+              backgroundColor: '#D0021B',
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+            },
+          },
+        },
+      });
     },
   }
 };
