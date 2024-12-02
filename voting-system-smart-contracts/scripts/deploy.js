@@ -1,30 +1,38 @@
 const { ethers } = require("hardhat");
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
 async function main() {
     const [deployer] = await ethers.getSigners();
     console.log("Deploying contracts with the account:", deployer.address);
 
-    // Ensure you pass both arguments: the array of initial admins and the token address
     const initialAdmins = [
-        '0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e',
+        '0xdD2FD4581271e230360230F9337D5c0430Bf44C0',
+        '0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199'
     ];
-
-    const tokenAddress = '0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199';  // Replace with actual token address
+    const tokenAddress = '0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199';
 
     const VotingContract = await ethers.getContractFactory("VotingContract");
 
-    // Deploy the contract with both the initialAdmins array and the token address
-    const votingContract = await VotingContract.deploy(initialAdmins, tokenAddress);
-    console.log("Voting contract deployed to:", votingContract.address);
+    try {
+        const votingContract = await VotingContract.deploy(initialAdmins, tokenAddress);
+        await votingContract.deploymentTransaction().wait();
 
-    const contractAddress = { address: votingContract.address };
-    fs.writeFileSync(path.join(__dirname, 'deployedAddress.json'), JSON.stringify(contractAddress));
-    console.log('Contract address written to deployedAddress.json');
+        const contractAddress = votingContract.target;
+        console.log("Voting contract deployed to:", contractAddress);
+
+        const deployedAddressPath = path.join(__dirname, "deployedAddress.json");
+
+        // Save as an object with "address" key
+        fs.writeFileSync(deployedAddressPath, JSON.stringify({ address: contractAddress }, null, 2));
+        console.log("Contract address saved to deployedAddress.json");
+
+    } catch (error) {
+        console.error("Error deploying contract:", error);
+    }
 }
 
 main().catch((error) => {
-    console.error(error);
+    console.error("Script failed with error:", error);
     process.exit(1);
 });

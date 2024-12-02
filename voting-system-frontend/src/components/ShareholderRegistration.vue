@@ -134,6 +134,9 @@ export default {
 
         console.log("Transaction sent:", tx);
         alert("Registration successful!");
+        // Clear the form after successful registration
+        this.shares = "";  // Reset the shares input
+        this.errorMessage = "";  // Clear any existing error message
       } catch (err) {
         console.error("Registration failed:", err);
         this.errorMessage = `Registration failed. Error: ${err.message || 'Unknown error'}`;

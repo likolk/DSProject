@@ -1,24 +1,26 @@
-// src/services/eventBus.js
-
 import { reactive } from 'vue';
 
-export const eventBus = reactive({
-  emit(event, ...args) {
-    const handlers = this[event] || [];
-    handlers.forEach(handler => handler(...args));
-  },
-  on(event, handler) {
-    if (!this[event]) {
-      this[event] = [];
+const eventBus = reactive({
+  events: {},
+  on(event, callback) {
+    if (!this.events[event]) {
+      this.events[event] = [];
     }
-    this[event].push(handler);
+    this.events[event].push(callback);
   },
-  off(event, handler) {
-    if (this[event]) {
-      const index = this[event].indexOf(handler);
-      if (index > -1) {
-        this[event].splice(index, 1);
+  off(event, callback) {
+    if (this.events[event]) {
+      const index = this.events[event].indexOf(callback);
+      if (index !== -1) {
+        this.events[event].splice(index, 1);
       }
+    }
+  },
+  emit(event, data) {
+    if (this.events[event]) {
+      this.events[event].forEach(callback => callback(data));
     }
   }
 });
+
+export { eventBus };
