@@ -32,7 +32,7 @@ struct Proposal {
     uint256 endTime;
     address proposer;
     bool active;
-    uint256 votesFor;  // Counter for 'Yes' votes
+    uint256 votesFor;  
     uint256 votesAgainst;
 }
 
@@ -193,6 +193,14 @@ function createProposal(
         voted[msg.sender] = true;  // Mark the user as having voted
 
         emit VoteCast(proposalId, msg.sender, voteWeight, voteFor);
+    }
+
+    event ProposalDeleted(uint256 proposalId);
+
+    function deleteProposal(uint256 proposalId) public {
+        // require(proposalId < proposals.length, "Invalid proposal ID");
+        proposals[proposalId].active = false;
+        emit ProposalDeleted(proposalId);
     }
 
 }

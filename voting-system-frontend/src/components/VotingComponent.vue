@@ -8,11 +8,13 @@
       </div>
       <div class="proposal-details">
         <p class="details">Duration: {{ proposal.durationInMinutes }} minutes</p>
-        <p class="details">Quorum: {{ proposal.quorumType }}</p>
+        <p class="details">Quorum: {{ getQuorumType(proposal.quorumType) }}</p>
+
       </div>
       <div class="vote-buttons">
         <button @click="vote(proposal.id, 'yes')" class="vote-button yes">Yes</button>
         <button @click="vote(proposal.id, 'no')" class="vote-button no">No</button>
+        <button @click="deleteProposal(proposal.id)" class="delete-button">Delete</button>
       </div>
       <div class="vote-status">
         <p>Yes Votes: {{ proposal.votesFor }}</p>
@@ -39,15 +41,30 @@
       };
     },
     mounted() {
-      console.log("ABI content:", votingAbi.abi);
-      console.log("Deployed Address:", deployedAddress.address);
-      this.initializeWallet();
-      eventBus.on('newProposalCreated', this.fetchProposals); // Listen for the event
-    },
-    beforeDestroy() {
-      // Remove event listener when the component is destroyed to prevent memory leaks
-      eventBus.off('newProposalCreated', this.fetchProposals);
-    },
+    console.log("ABI content:", votingAbi.abi);
+    console.log("Deployed Address:", deployedAddress.address);
+
+    // Initialize wallet and contract instance
+    this.initializeWallet().then(() => {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        this.contract = new ethers.Contract(deployedAddress.address, votingAbi.abi, signer);
+
+        // Listen for events
+        eventBus.on('newProposalCreated', this.fetchProposals); // Listen for the event
+        this.contract.on("ProposalDeleted", this.fetchProposals);
+    }).catch(err => {
+        console.error("Error during wallet initialization:", err);
+    });
+},
+beforeDestroy() {
+    // Remove event listeners
+    if (this.contract) {
+        eventBus.off('newProposalCreated', this.fetchProposals);
+        this.contract.off("ProposalDeleted", this.fetchProposals);
+    }
+},
+
     methods: {
       async vote(proposalId, voteOption) {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -73,11 +90,12 @@
             id: index,
             title: proposal.title,
             description: proposal.description,
-            votesFor: proposal.votesFor ? proposal.votesFor.toString() : "0", // Assuming BigNumber is returned
-            votesAgainst: proposal.votesAgainst ? proposal.votesAgainst.toString() : "0", // Assuming BigNumber is returned
+            votesFor: proposal.votesFor.toString(),
+            votesAgainst: proposal.votesAgainst.toString(),
             active: proposal.active,
-            votingEndTime: proposal.votingEndTime ? proposal.votingEndTime.toString() : "0", // If it's a timestamp
+            votingEndTime: proposal.votingEndTime ? proposal.votingEndTime.toString() : "0",
             quorumType: proposal.quorumType,
+            durationInMinutes: proposal.durationInMinutes.toString()
           }));
 
           // push new proposal to the list"
@@ -118,6 +136,20 @@
           return "Unknown";
       }
     },
+    // delete proposal function
+    async deleteProposal(proposalId) {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const contract = new ethers.Contract(deployedAddress.address, votingAbi.abi, signer);
+        try {
+          console.log("Deleting proposal with ID:", proposalId);
+          await contract.deleteProposal(proposalId);
+            this.fetchProposals();
+        } catch (error) {
+            console.error("Error deleting proposal:", error);
+        }
+    },
+      
     },
   };
   </script>
@@ -231,5 +263,16 @@ h3 {
 .vote-status p {
   font-weight: bold;
   color: #333;
+}
+
+.inactive {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.inactive-label {
+    text-align: center;
+    color: #dc3545;
+    font-weight: bold;
 }
 </style>
