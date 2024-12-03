@@ -75,9 +75,13 @@
             votingEndTime: proposal.votingEndTime ? proposal.votingEndTime.toString() : "0", // If it's a timestamp
             quorumType: proposal.quorumType,
           }));
-  
-          console.log("Mapped Proposals:", proposalsList);
+
+          // push new proposal to the list"
+          const proposalList = []
+          proposalsList.push(proposalList)
+          console.log("Proposals List:", proposalsList);
           this.proposals = proposalsList;
+          
         } catch (error) {
           console.error('Error fetching proposals:', error);
         }
