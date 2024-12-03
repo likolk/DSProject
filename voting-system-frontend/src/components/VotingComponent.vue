@@ -23,50 +23,51 @@
     </div>
   </div>
 </template>
-  
-  <script>
-  import { ref } from "vue";
-  import { ethers } from "ethers";
-  import { eventBus } from '@/services/eventBus';
-  import votingAbi from "../../../voting-system-smart-contracts/artifacts/contracts/smartContract.sol/VotingContract.json";
-  import deployedAddress from "../../../voting-system-smart-contracts/scripts/deployedAddress.json";
-  
-  export default {
-    name: "VotingComponent",
-    data() {
-      return {
-        proposals: [],
-        // totalVotes: 0,
-        // votingStatus: false,
-      };
-    },
-    mounted() {
+
+<script>
+import { ref } from "vue";
+import { ethers } from "ethers";
+import { eventBus } from '@/services/eventBus';
+import votingAbi from "../../../voting-system-smart-contracts/artifacts/contracts/smartContract.sol/VotingContract.json";
+import deployedAddress from "../../../voting-system-smart-contracts/scripts/deployedAddress.json";
+
+export default {
+  name: "VotingComponent",
+  data() {
+    return {
+      proposals: [],
+      // totalVotes: 0,
+      // votingStatus: false,
+    };
+  },
+  mounted() {
     console.log("ABI content:", votingAbi.abi);
     console.log("Deployed Address:", deployedAddress.address);
 
     // Initialize wallet and contract instance
     this.initializeWallet().then(() => {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const signer = provider.getSigner();
-        this.contract = new ethers.Contract(deployedAddress.address, votingAbi.abi, signer);
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      this.contract = new ethers.Contract(deployedAddress.address, votingAbi.abi, signer);
 
-        // Listen for events
-        eventBus.on('newProposalCreated', this.fetchProposals); // Listen for the event
-        this.contract.on("ProposalDeleted", this.fetchProposals);
-    }).catch(err => {
-        console.error("Error during wallet initialization:", err);
+      // Listen for events
+      eventBus.on("newProposalCreated", this.fetchProposals);
+      this.contract.on("ProposalDeleted", this.handleProposalDeleted);
+    }).catch((err) => {
+      console.error("Error during wallet initialization:", err);
     });
-},
-beforeDestroy() {
+  },
+  beforeDestroy() {
     // Remove event listeners
     if (this.contract) {
-        eventBus.off('newProposalCreated', this.fetchProposals);
-        this.contract.off("ProposalDeleted", this.fetchProposals);
+      eventBus.off("newProposalCreated", this.fetchProposals);
+      this.contract.off("ProposalDeleted", this.handleProposalDeleted);
     }
-},
+  },
 
-    methods: {
-      async vote(proposalId, voteOption) {
+  methods: {
+
+    async vote(proposalId, voteOption) {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       const contract = new ethers.Contract(deployedAddress.address, votingAbi.abi, signer);
@@ -77,52 +78,52 @@ beforeDestroy() {
         console.error("Voting failed:", err);
       }
     },
-      async fetchProposals() {
-        console.log("Fetching proposals in VotingComponent");
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const contract = new ethers.Contract(deployedAddress.address, votingAbi.abi, provider);
-        try {
-          console.log("Calling getProposals()");
-          const proposals = await contract.getProposals();
-          console.log("Proposals fetched:", proposals);
-  
-          const proposalsList = proposals.map((proposal, index) => ({
-            id: index,
-            title: proposal.title,
-            description: proposal.description,
-            votesFor: proposal.votesFor.toString(),
-            votesAgainst: proposal.votesAgainst.toString(),
-            active: proposal.active,
-            votingEndTime: proposal.votingEndTime ? proposal.votingEndTime.toString() : "0",
-            quorumType: proposal.quorumType,
-            durationInMinutes: proposal.durationInMinutes.toString()
-          }));
+    async fetchProposals() {
+      console.log("Fetching proposals in VotingComponent");
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const contract = new ethers.Contract(deployedAddress.address, votingAbi.abi, provider);
+      try {
+        console.log("Calling getProposals()");
+        const proposals = await contract.getProposals();
+        console.log("Proposals fetched:", proposals);
 
-          // push new proposal to the list"
-          const proposalList = []
-          proposalsList.push(proposalList)
-          console.log("Proposals List:", proposalsList);
-          this.proposals = proposalsList;
-      
-        } catch (error) {
-          console.error('Error fetching proposals:', error);
+        const proposalsList = proposals.map((proposal, index) => ({
+          id: index,
+          title: proposal.title,
+          description: proposal.description,
+          votesFor: proposal.votesFor.toString(),
+          votesAgainst: proposal.votesAgainst.toString(),
+          active: proposal.active,
+          votingEndTime: proposal.votingEndTime ? proposal.votingEndTime.toString() : "0",
+          quorumType: proposal.quorumType,
+          durationInMinutes: proposal.durationInMinutes.toString()
+        }));
+
+        // push new proposal to the list"
+        const proposalList = []
+        proposalsList.push(proposalList)
+        console.log("Proposals List:", proposalsList);
+        this.proposals = proposalsList;
+
+      } catch (error) {
+        console.error('Error fetching proposals:', error);
+      }
+    },
+    async initializeWallet() {
+      if (window.ethereum) {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        try {
+          await window.ethereum.request({ method: "eth_requestAccounts" });
+          this.fetchProposals();
+        } catch (err) {
+          console.error("Error connecting to wallet:", err);
+          alert("Wallet connection failed.");
         }
-      },
-      async initializeWallet() {
-        if (window.ethereum) {
-          const provider = new ethers.providers.Web3Provider(window.ethereum);
-          try {
-            await window.ethereum.request({ method: "eth_requestAccounts" });
-            this.fetchProposals();
-          } catch (err) {
-            console.error("Error connecting to wallet:", err);
-            alert("Wallet connection failed.");
-          }
-        } else {
-          alert("Please install MetaMask to interact with this application.");
-        }
-      },
-      getQuorumType(quorumType) {
+      } else {
+        alert("Please install MetaMask to interact with this application.");
+      }
+    },
+    getQuorumType(quorumType) {
       switch (quorumType) {
         case 0:
           return "Simple Majority";
@@ -138,23 +139,27 @@ beforeDestroy() {
     },
     // delete proposal function
     async deleteProposal(proposalId) {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const signer = provider.getSigner();
-        const contract = new ethers.Contract(deployedAddress.address, votingAbi.abi, signer);
-        try {
-          console.log("Deleting proposal with ID:", proposalId);
-          await contract.deleteProposal(proposalId);
-            this.fetchProposals();
-        } catch (error) {
-            console.error("Error deleting proposal:", error);
-        }
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(deployedAddress.address, votingAbi.abi, signer);
+      try {
+        const tx = await contract.deleteProposal(proposalId);
+        await tx.wait(); // Wait for the transaction to be mined
+        this.fetchProposals(); // Refresh the proposals list
+      } catch (error) {
+        console.error("Error deleting proposal:", error);
+      }
     },
-      
+    handleProposalDeleted(event) {
+      const deletedProposalId = event.args.proposalId.toNumber();
+      // Remove the proposal from the list
+      this.proposals = this.proposals.filter((proposal) => proposal.id !== deletedProposalId);
     },
-  };
-  </script>
-  
-  <style scoped>
+  },
+};
+</script>
+
+<style scoped>
 .voting-component {
   font-family: 'Roboto', sans-serif;
   padding: 20px;
@@ -266,13 +271,13 @@ h3 {
 }
 
 .inactive {
-    opacity: 0.6;
-    pointer-events: none;
+  opacity: 0.6;
+  pointer-events: none;
 }
 
 .inactive-label {
-    text-align: center;
-    color: #dc3545;
-    font-weight: bold;
+  text-align: center;
+  color: #dc3545;
+  font-weight: bold;
 }
 </style>
