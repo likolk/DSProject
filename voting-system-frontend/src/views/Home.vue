@@ -92,7 +92,7 @@ export default {
   },
   methods: {
     getVotingContract(web3) {
-      const contractAddress = "0x18Ae637480be5c43fcd46373016b2D18dCd95f96";
+      const contractAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
       const contractABI = votingAbi.abi;
       console.log("votingAbi", votingAbi);
       return new web3.eth.Contract(contractABI, contractAddress);
