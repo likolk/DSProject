@@ -11,6 +11,8 @@ contract VotingContract {
     mapping(uint256 => ProposalOutcome) public proposalOutcomes;
     mapping(address => bool) public admins;
     uint256 public totalShares;
+    mapping(address => bool) public voted;
+
 
 
 
@@ -23,14 +25,17 @@ contract VotingContract {
 
 
 struct Proposal {
-        string title;
-        string description;
-        uint256 durationInMinutes;
-        uint8 quorumType;
-        uint256 endTime;
-        address proposer;
-        bool active;
-    }
+    string title;
+    string description;
+    uint256 durationInMinutes;
+    uint8 quorumType;
+    uint256 endTime;
+    address proposer;
+    bool active;
+    uint256 votesFor;  
+    uint256 votesAgainst;
+}
+
 
     Proposal[] public proposals;
     uint256 public proposalCount;
@@ -101,7 +106,10 @@ function createProposal(
         quorumType: quorumType,
         endTime: endTime,
         proposer: msg.sender,
-        active: true
+        active: true,
+        votesFor: 0,
+        votesAgainst: 0
+
     }));
 
     uint256 proposalId = proposals.length - 1;
@@ -114,56 +122,10 @@ function createProposal(
         admins[newAdmin] = true;
     }
 
-    // function get proposals, based on this 
-    /*
-    async fetchProposals() {
-    console.log("Fetching proposals in VotingComponent");
-    const web3 = new Web3(window.ethereum);
-    try {
-        console.log("Step 1")
-        const contract = await this.getVotingContract(web3);
-        console.log("Step 2")
-        const proposals = await contract.methods.getProposals().call();
-        // JavaScript code
-
-        // You can now access each proposal's attributes:
-        proposals.forEach(proposal => {
-        console.log(proposal.title);
-        console.log(proposal.description);
-        console.log(proposal.votesFor);
-        console.log(proposal.votesAgainst);
-        console.log(proposal.active);
-        console.log(proposal.votingEndTime);
-        console.log(proposal.quorumType);
-        });
-
-
-        console.log("Step 3")
-        console.log("Fetched proposals:", proposals);
-
-        const { ids, titles, descriptions, votesForArray, votesAgainstArray, actives } = proposals;
-        console.log("Step 4")
-        const proposalsList = ids.map((id, index) => ({
-            id: id,
-            title: titles[index],
-            description: descriptions[index],
-            votesFor: votesForArray[index],
-            votesAgainst: votesAgainstArray[index],
-            active: actives[index],
-        }));
-        console.log("Step 5")
-        console.log('Proposals:', proposalsList);
-        this.proposals = proposalsList;
-    } catch (error) {
-        console.error('Error fetching proposals:', error);
-    }
-},*/
-
    function getProposals() public view returns (Proposal[] memory) {
     return proposals;
 }
-    
-    
+
 
     // Optional: Function to remove an admin dynamically
     function removeAdmin(address admin) public onlyAdmin {
@@ -184,45 +146,6 @@ function createProposal(
         shares[voter] = shareCount;
         totalShares += shareCount;
     }
-
-
-    // function vote(uint256 proposalId, bool voteFor) public {
-    //     // require(shares[msg.sender] > 0, "No voting power.");
-    //     // require(proposals[proposalId].active, "Proposal inactive.");
-    //     // require(proposals[proposalId].votingEndTime >= block.timestamp,
-    //     // "Voting period has finished.");
-
-    //     // for (uint256 i = 0; i < votingHistory[msg.sender].length; i++) {
-    //     //     require(votingHistory[msg.sender][i].proposalId != proposalId, "You already voted on this proposal.");
-    //     // }
-    //     uint256 voteWeight = (shares[msg.sender] * 10000) / totalShares;
-
-    //     if (voteFor) {
-    //         proposals[proposalId].votesFor += voteWeight;
-    //     } else {
-    //         proposals[proposalId].votesAgainst += voteWeight;
-    //     }
-
-    //     proposals[proposalId].totalVotesCast += voteWeight;
-
-    //     votingHistory[msg.sender].push(
-    //         VotingRecord({
-    //             proposalId: proposalId,
-    //             votedFor: voteFor,
-    //             voteWeight: voteWeight
-    //         })
-    //     );
-
-    //     uint256 rewardAmount = calculateReward(voteWeight);
-    //     // require(governanceToken.balanceOf(msg.sender) == 0, "Rewards already claimed.");
-    //     governanceToken.mint(msg.sender, rewardAmount);
-
-    //     emit VoteCast(proposalId, msg.sender, voteWeight, voteFor);
-
-    //     if (hasMetQuorum(proposalId)) {
-    //         endVoting(proposalId);
-    //     }
-    // }
 
     function calculateReward(
         uint256 voteWeight
@@ -246,4 +169,38 @@ function createProposal(
     function getProposalsCount() public view returns (uint256) {
         return proposalCount;
     }
+
+    function castVote(uint256 proposalId, bool voteFor) public {
+        require(!voted[msg.sender], "You have already voted");
+        require(proposals[proposalId].active, "Proposal is not active");
+
+        uint256 voteWeight = shares[msg.sender];
+        require(voteWeight > 0, "You must hold shares to vote");
+
+        if (voteFor) {
+            proposals[proposalId].votesFor += voteWeight;
+        } else {
+            proposals[proposalId].votesAgainst += voteWeight;
+        }
+
+        // Record the vote
+        votingHistory[msg.sender].push(VotingRecord({
+            proposalId: proposalId,
+            votedFor: voteFor,
+            voteWeight: voteWeight
+        }));
+
+        voted[msg.sender] = true;  // Mark the user as having voted
+
+        emit VoteCast(proposalId, msg.sender, voteWeight, voteFor);
+    }
+
+    event ProposalDeleted(uint256 proposalId);
+
+    function deleteProposal(uint256 proposalId) public {
+        // require(proposalId < proposals.length, "Invalid proposal ID");
+        proposals[proposalId].active = false;
+        emit ProposalDeleted(proposalId);
+    }
+
 }
