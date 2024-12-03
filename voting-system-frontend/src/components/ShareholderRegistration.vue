@@ -53,7 +53,7 @@ export default {
       // Get a valid account with balance
       await this.selectAccountWithBalance();
 
-      const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+      const contractAddress = "0x410a52a849479E8Dc87B07d89e72483A4b3ca098";
       this.contract = new this.web3.eth.Contract(votingAbi.abi, contractAddress);
       console.log("Contract initialized:", this.contract);
     } catch (err) {

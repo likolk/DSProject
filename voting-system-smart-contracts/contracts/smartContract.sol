@@ -195,12 +195,17 @@ function createProposal(
         emit VoteCast(proposalId, msg.sender, voteWeight, voteFor);
     }
 
-    event ProposalDeleted(uint256 proposalId);
+event ProposalDeleted(uint256 indexed proposalId);
 
-    function deleteProposal(uint256 proposalId) public {
-        // require(proposalId < proposals.length, "Invalid proposal ID");
-        proposals[proposalId].active = false;
-        emit ProposalDeleted(proposalId);
-    }
+function deleteProposal(uint256 proposalId) external {
+    // require(proposalId < proposals.length, "Invalid proposal ID");
+
+    // Delete by swapping with the last element and then popping
+    proposals[proposalId] = proposals[proposals.length - 1];
+    proposals.pop();
+
+    emit ProposalDeleted(proposalId);
+}
+
 
 }
