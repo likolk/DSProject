@@ -5,7 +5,8 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./VotingWithRewards.sol";
 
 contract VotingContract {
-    mapping(address => uint256) public shares;
+mapping(address => uint256) public shares; 
+    mapping(address => uint256) public tokens; 
     // mapping(uint256 => Proposal) public proposals;
     mapping(address => VotingRecord[]) public votingHistory;
     mapping(uint256 => ProposalOutcome) public proposalOutcomes;
@@ -138,13 +139,43 @@ function createProposal(
     }
 
 
-    function registerShareholder(address voter, uint256 shareCount) public {
-        require(
-            !isVotingPeriodActive,
-            "Hey its an active voting period, you cannot vote now."
-        );
-        shares[voter] = shareCount;
-        totalShares += shareCount;
+    // function registerShareholder(address voter, uint256 shareCount) public {
+    //     require(
+    //         !isVotingPeriodActive,
+    //         "Hey its an active voting period, you cannot vote now."
+    //     );
+    //     shares[voter] = shareCount;
+    //     totalShares += shareCount;
+    // }
+
+    function registerShareholder(address account, uint256 _shares) external {
+        shares[account] = _shares;
+        tokens[account] = _shares;  // Convert shares to tokens (1:1 mapping)
+    }
+
+    function vote(address account, uint256 voteAmount) external {
+        require(tokens[account] >= voteAmount, "Not enough tokens to vote");
+        tokens[account] -= voteAmount;
+
+        // Update the total shares
+        totalShares -= voteAmount;
+
+        // Update the proposal vote count
+        proposals[0].votesFor += voteAmount;
+
+        // Record the vote
+        votingHistory[account].push(VotingRecord({
+            proposalId: 0,
+            votedFor: true,
+            voteWeight: voteAmount
+        }));
+
+        emit VoteCast(0, account, voteAmount, true);
+
+    }
+
+    function getTokens(address account) external view returns (uint256) {
+        return tokens[account];
     }
 
     function calculateReward(
