@@ -214,14 +214,13 @@ function createProposal(
             proposals[proposalId].votesAgainst += voteWeight;
         }
 
-        // Record the vote
         votingHistory[msg.sender].push(VotingRecord({
             proposalId: proposalId,
             votedFor: voteFor,
             voteWeight: voteWeight
         }));
 
-        voted[msg.sender] = true;  // Mark the user as having voted
+        voted[msg.sender] = true;  
 
         emit VoteCast(proposalId, msg.sender, voteWeight, voteFor);
     }
