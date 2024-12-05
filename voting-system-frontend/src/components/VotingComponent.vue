@@ -137,26 +137,26 @@ export default {
           return "Unknown";
       }
     },
-    // delete proposal function
     async deleteProposal(proposalId) {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const contract = new ethers.Contract(deployedAddress.address, votingAbi.abi, signer);
-      try {
-        const tx = await contract.deleteProposal(proposalId);
-        await tx.wait(); // Wait for the transaction to be mined
-        this.fetchProposals(); // Refresh the proposals list
-      } catch (error) {
-        console.error("Error deleting proposal:", error);
-      }
-    },
-    handleProposalDeleted(event) {
-      const deletedProposalId = event.args.proposalId.toNumber();
-      // Remove the proposal from the list
-      this.proposals = this.proposals.filter((proposal) => proposal.id !== deletedProposalId);
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const contract = new ethers.Contract(deployedAddress.address, votingAbi.abi, signer);
+        try {
+            const tx = await contract.deleteProposal(proposalId);
+            await tx.wait(); // Wait for the transaction to be mined
+            this.fetchProposals(); // Refresh the proposals list after deletion
+        } catch (error) {
+            console.error("Error deleting proposal:", error);
+            alert("Failed to delete the proposal.");
+        }
     },
   },
-};
+  handleProposalDeleted(event) {
+    const deletedProposalId = event.args.proposalId.toNumber();
+    this.proposals = this.proposals.filter((proposal) => proposal.id !== deletedProposalId);
+},
+
+}
 </script>
 
 <style scoped>
@@ -279,5 +279,15 @@ h3 {
   text-align: center;
   color: #dc3545;
   font-weight: bold;
+}
+
+.delete-button {
+    background-color: #ff9800;
+    color: white;
+}
+
+.delete-button:hover {
+    background-color: #fb8c00;
+    transform: translateY(-2px);
 }
 </style>

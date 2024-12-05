@@ -197,15 +197,9 @@ function createProposal(
 
 event ProposalDeleted(uint256 indexed proposalId);
 
-function deleteProposal(uint256 proposalId) external {
-    // require(proposalId < proposals.length, "Invalid proposal ID");
-
-    // Delete by swapping with the last element and then popping
-    proposals[proposalId] = proposals[proposals.length - 1];
-    proposals.pop();
-
-    emit ProposalDeleted(proposalId);
-}
-
-
+    function deleteProposal(uint256 proposalId) external onlyAdmin {
+        require(proposalId < proposals.length, "Invalid proposal ID");
+        proposals[proposalId].active = false;
+        emit ProposalDeleted(proposalId);
+    }
 }

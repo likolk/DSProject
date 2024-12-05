@@ -49,6 +49,9 @@ import VotingHistoryDashboard from "@/components/VotingHistoryDashboard.vue";
 import Web3 from "web3";
 import votingAbi from "../../../voting-system-smart-contracts/artifacts/contracts/smartContract.sol/VotingContract.json";
 import Chart from "chart.js/auto";
+import deployedAddress from "../../../voting-system-smart-contracts/scripts/deployedAddress.json";
+
+
 
 export default {
   name: "Home",
@@ -92,7 +95,7 @@ export default {
   },
   methods: {
     getVotingContract(web3) {
-      const contractAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+      const contractAddress = deployedAddress.address;
       const contractABI = votingAbi.abi;
       console.log("votingAbi", votingAbi);
       return new web3.eth.Contract(contractABI, contractAddress);
