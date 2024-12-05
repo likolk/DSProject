@@ -9,7 +9,8 @@ const {
     getTotalShares,
     getRewardBalanceController,
     getVotingProgressController,
-    checkQuorum
+    checkQuorum,
+    deleteProposalController
 
 } = require('../controllers/votingControllers');
 const { route } = require('../app');
@@ -28,5 +29,9 @@ router.post('/voter/register', registerVoterController);
 router.post('/proposal', createProposalController);
 router.post('/proposal/:proposalId/end', endVotingController);
 router.post('/shares/update', updateSharesController);
+
+// delete proposal route
+router.delete('/proposal/:proposalId', deleteProposalController);
+
 
 module.exports = router;

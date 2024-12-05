@@ -44,7 +44,7 @@ export default {
   methods: {
     async checkAdminStatus() {
       const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-      const selectedAddress = accounts[0]; 
+      const selectedAddress = deployedAddress.address;
       console.log("Selected Address:", selectedAddress);
 
       const provider = new ethers.providers.Web3Provider(window.ethereum); 
@@ -52,13 +52,10 @@ export default {
       const contract = new ethers.Contract(this.contractAddress, votingAbi.abi, signer);
       console.log("Contract object:", contract);
 
-      const initialAdmins = [
-        '0xdD2FD4581271e230360230F9337D5c0430Bf44C0',
-        '0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199',
-        '0xbda5747bfd65f08deb54cb465eb87d40e51b197e',
-        '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
-        '0x5FbDB2315678afecb367f032d93F642f64180aa3'
-      ];
+      const admin  = deployedAddress.address;
+      const initialAdmins = [];
+      initialAdmins.push(admin);
+
 
       const normalizedSelectedAddress = selectedAddress.toLowerCase().trim();
       const normalizedInitialAdmins = initialAdmins.map(address => address.toLowerCase().trim());

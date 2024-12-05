@@ -5,7 +5,8 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./VotingWithRewards.sol";
 
 contract VotingContract {
-    mapping(address => uint256) public shares;
+mapping(address => uint256) public shares; 
+    mapping(address => uint256) public tokens; 
     // mapping(uint256 => Proposal) public proposals;
     mapping(address => VotingRecord[]) public votingHistory;
     mapping(uint256 => ProposalOutcome) public proposalOutcomes;
@@ -138,13 +139,43 @@ function createProposal(
     }
 
 
-    function registerShareholder(address voter, uint256 shareCount) public {
-        require(
-            !isVotingPeriodActive,
-            "Hey its an active voting period, you cannot vote now."
-        );
-        shares[voter] = shareCount;
-        totalShares += shareCount;
+    // function registerShareholder(address voter, uint256 shareCount) public {
+    //     require(
+    //         !isVotingPeriodActive,
+    //         "Hey its an active voting period, you cannot vote now."
+    //     );
+    //     shares[voter] = shareCount;
+    //     totalShares += shareCount;
+    // }
+
+    function registerShareholder(address account, uint256 _shares) external {
+        shares[account] = _shares;
+        tokens[account] = _shares;  // Convert shares to tokens (1:1 mapping)
+    }
+
+    function vote(address account, uint256 voteAmount) external {
+        require(tokens[account] >= voteAmount, "Not enough tokens to vote");
+        tokens[account] -= voteAmount;
+
+        // Update the total shares
+        totalShares -= voteAmount;
+
+        // Update the proposal vote count
+        proposals[0].votesFor += voteAmount;
+
+        // Record the vote
+        votingHistory[account].push(VotingRecord({
+            proposalId: 0,
+            votedFor: true,
+            voteWeight: voteAmount
+        }));
+
+        emit VoteCast(0, account, voteAmount, true);
+
+    }
+
+    function getTokens(address account) external view returns (uint256) {
+        return tokens[account];
     }
 
     function calculateReward(
@@ -183,29 +214,22 @@ function createProposal(
             proposals[proposalId].votesAgainst += voteWeight;
         }
 
-        // Record the vote
         votingHistory[msg.sender].push(VotingRecord({
             proposalId: proposalId,
             votedFor: voteFor,
             voteWeight: voteWeight
         }));
 
-        voted[msg.sender] = true;  // Mark the user as having voted
+        voted[msg.sender] = true;  
 
         emit VoteCast(proposalId, msg.sender, voteWeight, voteFor);
     }
 
 event ProposalDeleted(uint256 indexed proposalId);
 
-function deleteProposal(uint256 proposalId) external {
-    // require(proposalId < proposals.length, "Invalid proposal ID");
-
-    // Delete by swapping with the last element and then popping
-    proposals[proposalId] = proposals[proposals.length - 1];
-    proposals.pop();
-
-    emit ProposalDeleted(proposalId);
-}
-
-
+    function deleteProposal(uint256 proposalId) external onlyAdmin {
+        require(proposalId < proposals.length, "Invalid proposal ID");
+        proposals[proposalId].active = false;
+        emit ProposalDeleted(proposalId);
+    }
 }

@@ -145,6 +145,20 @@ async function checkQuorum(req, res) {
   }
 }
 
+// delete proposal
+async function deleteProposalController(req, res) {
+  const { proposalId } = req.params;
+  try {
+      const txHash = await contractService.deleteProposal(proposalId);
+      res.status(200).json({
+          message: "Proposal deleted successfully", txHash
+      });
+  } catch (error) {
+      console.error("Error deleting proposal:", error);
+      res.status(500).json({ error: "Failed to delete proposal" });
+  }
+}
+
 module.exports = { 
   registerVoterController, 
   getProposalVotesController,
@@ -155,5 +169,6 @@ module.exports = {
   getTotalShares,
   getRewardBalanceController,
   getVotingProgressController,
-  checkQuorum
+  checkQuorum,
+  deleteProposalController
  };

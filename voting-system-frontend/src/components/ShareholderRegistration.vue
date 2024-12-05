@@ -5,6 +5,11 @@
     <input v-model="shares" class="shares-input" type="number" placeholder="Enter number of shares" />
     <button class="register-btn" @click="registerShareholder">Register</button>
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+
+    <div v-if="tokens > 0">
+      <p>Tokens available for voting: {{ tokens }}</p>
+    </div>
+
   </div>
 </template>
 
@@ -29,7 +34,8 @@ export default {
       contract: null,
       accounts: [],
       selectedAccount: null,
-      requiredBalanceInEther: 0.1, // Minimum required balance in ETH
+      requiredBalanceInEther: 0.1,
+      tokens: 0,
     };
   },
   methods: {
@@ -41,8 +47,6 @@ export default {
       this.web3 = new Web3(window.ethereum);
       console.log("Web3 initialized:", this.web3);
       console.log("Current provider:", this.web3.currentProvider);
-
-      // Force opening the MetaMask window to prompt for account selection
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
       console.log("Connected accounts:", accounts);
       this.accounts = accounts;
@@ -50,7 +54,6 @@ export default {
       console.log("Selected account:", selectedAccount);
       this.selectedAccount = selectedAccount;
 
-      // Get a valid account with balance
       await this.selectAccountWithBalance();
 
       const contractAddress = "0x410a52a849479E8Dc87B07d89e72483A4b3ca098";
@@ -66,7 +69,6 @@ export default {
 }
 ,
 
-    // Check if the selected account has sufficient balance
     async hasSufficientBalance(account) {
       try {
         const balanceInWei = await this.web3.eth.getBalance(account);
@@ -98,8 +100,15 @@ export default {
     },
 
     async registerShareholder() {
+      if (this.shares > 100) {
+  this.errorMessage = "You cannot register with more than 100 shares.";
+  console.log("Shares exceed limit:", this.shares);
+  return;
+}
+
+
       console.log("Registering shareholder...");
-      this.shares = Number(this.shares); // Ensure shares are a number
+      this.shares = Number(this.shares); 
       console.log("Shares value:", this.shares);
 
       if (!this.shares || this.shares <= 0) {
@@ -123,20 +132,18 @@ export default {
       console.log("Using account:", this.selectedAccount);
 
       try {
-        // If you want to send ETH with the transaction 
-        const valueInWei = this.web3.utils.toWei('0.5', 'ether'); // Example ETH value
+        const valueInWei = this.web3.utils.toWei('0.5', 'ether'); 
 
         // Register shareholder
         const tx = await this.contract.methods.registerShareholder(this.selectedAccount, this.shares).send({
           from: this.selectedAccount,
-          value: valueInWei, // Sending ETH with registration
+          value: valueInWei, 
         });
 
         console.log("Transaction sent:", tx);
         alert("Registration successful!");
-        // Clear the form after successful registration
-        this.shares = "";  // Reset the shares input
-        this.errorMessage = "";  // Clear any existing error message
+        this.shares = "";  
+        this.errorMessage = "";  
       } catch (err) {
         console.error("Registration failed:", err);
         this.errorMessage = `Registration failed. Error: ${err.message || 'Unknown error'}`;
@@ -147,6 +154,16 @@ export default {
       const contractAddress = "0x410a52a849479E8Dc87B07d89e72483A4b3ca098";
       return new this.web3.eth.Contract(votingAbi.abi, contractAddress, signer);
     },
+
+    async fetchTokens() {
+      try {
+        const tokens = await this.contract.methods.getTokens(this.selectedAccount).call();
+        this.tokens = tokens; 
+        console.log("Tokens available for voting:", this.tokens);
+      } catch (err) {
+        console.error("Error fetching tokens:", err);
+      }
+    }
   },
 };
 </script>
