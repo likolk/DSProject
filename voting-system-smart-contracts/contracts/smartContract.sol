@@ -90,7 +90,7 @@ contract VotingContract {
         string memory description,
         uint256 durationInMinutes,
         uint8 quorumType
-    ) public payable {
+    ) public payable onlyAdmin {
         require(msg.value == 1 ether, "Must send 1 ETH to create a proposal");
 
         uint256 endTime = block.timestamp + (durationInMinutes * 1 minutes);
@@ -268,7 +268,7 @@ contract VotingContract {
         }
     }
 
-    function finalizeProposal(uint256 proposalId) public {
+    function finalizeProposal(uint256 proposalId) public onlyAdmin() {
         Proposal storage proposal = proposals[proposalId];
         require(
             block.timestamp >= proposal.endTime,
@@ -307,7 +307,7 @@ contract VotingContract {
         return (pastProposals, outcomes);
     }
 
-    // retrieve a shareholder's voting history (addition to above)
+    // retrieve a shareholder's voting history (addition to above. extra feature)
     function getVotingHistory(address shareholder) public view returns (VotingRecord[] memory) {
         return votingHistory[shareholder];
     }

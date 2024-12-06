@@ -148,4 +148,24 @@ h3 {
   color: orange;
   font-weight: bold;
 }
+
+.activity-card {
+  background-color: #ff0000;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 10px auto;
+  max-width: 600px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.activity-card h4 {
+  margin: 0;
+  font-size: 20px;
+  color: #555;
+}
+
+.activity-card p {
+  font-size: 16px;
+  margin: 5px 0;
+}
 </style>
