@@ -33,15 +33,14 @@ Example: 35% of total shares have voted; 50% required for quorum.
 Reward shareholders with tokens for participating in votes (e.g., governance tokens or reputation points).
 Role-Based Admin Controls
 
-9. Implement roles for managing proposals, elections, etc:
-     Admins: Can manage proposals, events, etc.
-     Non-Admins: Can view but cannot modify anything.
-
 Not Implemented (yet?)
 
-10. Transparency with Anonymity:
+9. Transparency with Anonymity:
      Display aggregated voting results while maintaining the privacy of individual voters
 
+10. Implement roles for managing proposals and elections:
+     Admins: Can oversee and manage voting events.
+     Auditors: Can view detailed reports but cannot modify anything.
 
 
 ------------------

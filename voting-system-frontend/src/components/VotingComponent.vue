@@ -14,7 +14,7 @@
       <div class="vote-buttons">
         <button @click="vote(proposal.id, 'yes')" class="vote-button yes">Yes</button>
         <button @click="vote(proposal.id, 'no')" class="vote-button no">No</button>
-        <button @click="deleteProposal(proposal.id)" class="delete-button" v-if="checkIfAdmin">Delete</button>
+        <button  @click="deleteProposal(proposal.id)"  class="delete-button" v-if="checkIfAdmin">Delete</button>
       </div>
       <div class="vote-status">
         <p>Yes Votes: {{ proposal.votesFor }}</p>
@@ -44,30 +44,26 @@ export default {
   mounted() {
 
     const adminAddress = deployedAddress.address;
-    this.checkIfAdmin(adminAddress);
+  this.checkIfAdmin(adminAddress);
 
 
     console.log("ABI content:", votingAbi.abi);
     console.log("Deployed Address:", deployedAddress.address);
+
+    // Initialize wallet and contract instance
     this.initializeWallet().then(() => {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       this.contract = new ethers.Contract(deployedAddress.address, votingAbi.abi, signer);
+
+      // Listen for events
       eventBus.on("newProposalCreated", this.fetchProposals);
       this.contract.on("ProposalDeleted", this.handleProposalDeleted);
 
       this.contract.on("VoteCast", (proposalId, voter, weight, voteFor) => {
         console.log(`Vote Cast! ProposalId: ${proposalId}, Voter: ${voter}, Weight: ${weight}, VoteFor: ${voteFor}`);
+        // Update the vote count when a vote is cast
         this.updateVoteCount(proposalId, voteFor);
-      });
-
-      this.contract.on("VoteProgressUpdated", (proposalId, votesFor, votesAgainst) => {
-        console.log(`Vote Progress Updated! ProposalId: ${proposalId}, VotesFor: ${votesFor}, VotesAgainst: ${votesAgainst}`);
-        const proposal = this.proposals.find(p => p.id === proposalId);
-        if (proposal) {
-          proposal.votesFor = votesFor.toString();
-          proposal.votesAgainst = votesAgainst.toString();
-        }
       });
 
     }).catch((err) => {
@@ -75,6 +71,7 @@ export default {
     });
   },
   beforeDestroy() {
+    // Remove event listeners
     if (this.contract) {
       eventBus.off("newProposalCreated", this.fetchProposals);
       this.contract.off("ProposalDeleted", this.handleProposalDeleted);
@@ -82,20 +79,17 @@ export default {
   },
 
   methods: {
-    async clearProposals() {
-      this.proposals = [];
-    },
     async checkIfAdmin(adminAddress) {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const userAddress = await signer.getAddress();
-
-      if (userAddress.toLowerCase() === adminAddress.toLowerCase()) {
-        this.isAdmin = true;
-      } else {
-        this.isAdmin = false;
-      }
-    },
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const userAddress = await signer.getAddress();
+    
+    if (userAddress.toLowerCase() === adminAddress.toLowerCase()) {
+      this.isAdmin = true; 
+    } else {
+      this.isAdmin = false;
+    }
+  },
 
     async vote(proposalId, voteOption) {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -127,9 +121,11 @@ export default {
           votingEndTime: proposal.votingEndTime ? proposal.votingEndTime.toString() : "0",
           quorumType: proposal.quorumType,
           durationInMinutes: proposal.durationInMinutes.toString(),
-          voted: false,
-          outcome: proposal.active ? "Pending" : (proposal.votesFor >= this.calculateQuorum(proposal.quorumType) ? "Passed" : "Failed")
+          voted: false
         }));
+        const proposalList = []
+        proposalsList.push(proposalList)
+        console.log("Proposals List:", proposalsList);
         this.proposals = proposalsList;
 
       } catch (error) {
@@ -165,17 +161,17 @@ export default {
       }
     },
     async deleteProposal(proposalId) {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const contract = new ethers.Contract(deployedAddress.address, votingAbi.abi, signer);
-      try {
-        const tx = await contract.deleteProposal(proposalId);
-        await tx.wait(); // Wait for the transaction to be mined
-        this.fetchProposals(); // Refresh the proposals list after deletion
-      } catch (error) {
-        console.error("Error deleting proposal:", error);
-        alert("Failed to delete the proposal.");
-      }
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const contract = new ethers.Contract(deployedAddress.address, votingAbi.abi, signer);
+        try {
+            const tx = await contract.deleteProposal(proposalId);
+            await tx.wait(); // Wait for the transaction to be mined
+            this.fetchProposals(); // Refresh the proposals list after deletion
+        } catch (error) {
+            console.error("Error deleting proposal:", error);
+            alert("Failed to delete the proposal.");
+        }
     },
 
     updateVoteCount(proposalId, voteFor) {
@@ -186,40 +182,14 @@ export default {
         } else {
           proposal.votesAgainst = (parseInt(proposal.votesAgainst) + 1).toString();
         }
-        proposal.voted = true;
+        proposal.voted = true; 
       }
     },
-    handleProposalDeleted(event) {
-      const deletedProposalId = event.args.proposalId.toNumber();
-      this.proposals = this.proposals.filter((proposal) => proposal.id !== deletedProposalId);
-    },
-
-    async finalizeProposal(proposalId) {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const contract = new ethers.Contract(deployedAddress.address, votingAbi.abi, signer);
-      try {
-        await contract.finalizeProposal(proposalId);
-        this.fetchProposals();
-      } catch (err) {
-        console.error("Finalizing proposal failed:", err);
-      }
-    },
-
-    calculateQuorum(quorumType) {
-      if (quorumType === 0) {
-        return this.totalShares / 2;
-      } else if (quorumType === 1) {
-        return (this.totalShares * 2) / 3;
-      } else if (quorumType === 2) {
-        return (this.totalShares * 3) / 4;
-      } else if (quorumType === 3) {
-        return this.totalShares;
-      } else {
-        return 0;
-      }
-    },
+  handleProposalDeleted(event) {
+    const deletedProposalId = event.args.proposalId.toNumber();
+    this.proposals = this.proposals.filter((proposal) => proposal.id !== deletedProposalId);
   },
+},
 
 }
 </script>
@@ -347,12 +317,12 @@ h3 {
 }
 
 .delete-button {
-  background-color: #ff9800;
-  color: white;
+    background-color: #ff9800;
+    color: white;
 }
 
 .delete-button:hover {
-  background-color: #fb8c00;
-  transform: translateY(-2px);
+    background-color: #fb8c00;
+    transform: translateY(-2px);
 }
 </style>
