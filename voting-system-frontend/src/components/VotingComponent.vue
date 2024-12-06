@@ -79,6 +79,8 @@ export default {
   },
 
   methods: {
+    
+
     async checkIfAdmin(adminAddress) {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
@@ -127,6 +129,16 @@ export default {
         proposalsList.push(proposalList)
         console.log("Proposals List:", proposalsList);
         this.proposals = proposalsList;
+
+        this.proposals.forEach((proposal) => {
+          if (proposal.active) {
+            const currentTime = Math.floor(Date.now() / 1000);
+            const votingEndTime = parseInt(proposal.votingEndTime);
+            if (currentTime > votingEndTime) {
+              proposal.active = false;
+            }
+          }
+        });
 
       } catch (error) {
         console.error('Error fetching proposals:', error);
