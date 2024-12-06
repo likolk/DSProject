@@ -155,6 +155,8 @@ contract VotingContract {
         );
         shares[account] = _shares;
         tokens[account] = _shares; // Convert shares to tokens (1:1 mapping)
+        // interact with the tokenized share registry to mint tokens
+        governanceToken.mint(account, _shares);
     }
 
     function vote(address account, uint256 voteAmount) external {
@@ -311,4 +313,11 @@ contract VotingContract {
     function getVotingHistory(address shareholder) public view returns (VotingRecord[] memory) {
         return votingHistory[shareholder];
     }
+
+    // function to link with an existing tokenized share registry:
+    function linkTokenizedShareRegistry(address tokenAddress) external onlyAdmin {
+        governanceToken = GovernanceToken(tokenAddress);
+    }
+
+    
 }
