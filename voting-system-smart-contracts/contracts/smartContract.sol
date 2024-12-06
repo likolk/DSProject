@@ -201,29 +201,29 @@ function createProposal(
         return proposalCount;
     }
 
-    function castVote(uint256 proposalId, bool voteFor) public {
-        require(!voted[msg.sender], "You have already voted");
-        require(proposals[proposalId].active, "Proposal is not active");
+function castVote(uint256 proposalId, bool voteFor) public {
+    require(!voted[msg.sender], "You have already voted");
+    require(proposals[proposalId].active, "Proposal is not active");
 
-        uint256 voteWeight = shares[msg.sender];
-        require(voteWeight > 0, "You must hold shares to vote");
+    uint256 voteWeight = calculateVotingWeight(msg.sender);
+    require(voteWeight > 0, "You must hold shares to vote");
 
-        if (voteFor) {
-            proposals[proposalId].votesFor += voteWeight;
-        } else {
-            proposals[proposalId].votesAgainst += voteWeight;
-        }
-
-        votingHistory[msg.sender].push(VotingRecord({
-            proposalId: proposalId,
-            votedFor: voteFor,
-            voteWeight: voteWeight
-        }));
-
-        voted[msg.sender] = true;  
-
-        emit VoteCast(proposalId, msg.sender, voteWeight, voteFor);
+    if (voteFor) {
+        proposals[proposalId].votesFor += voteWeight;
+    } else {
+        proposals[proposalId].votesAgainst += voteWeight;
     }
+
+    votingHistory[msg.sender].push(VotingRecord({
+        proposalId: proposalId,
+        votedFor: voteFor,
+        voteWeight: voteWeight
+    }));
+
+    voted[msg.sender] = true;  
+
+    emit VoteCast(proposalId, msg.sender, voteWeight, voteFor);
+}
 
 event ProposalDeleted(uint256 indexed proposalId);
 
@@ -231,5 +231,10 @@ event ProposalDeleted(uint256 indexed proposalId);
         require(proposalId < proposals.length, "Invalid proposal ID");
         proposals[proposalId].active = false;
         emit ProposalDeleted(proposalId);
+    }
+
+    function calculateVotingWeight(address voter) public view returns (uint256) {
+        require(totalShares > 0, "Total shares must be greater than zero");
+        return (shares[voter] * 100) / totalShares;
     }
 }
