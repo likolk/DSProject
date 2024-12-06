@@ -49,20 +49,15 @@ export default {
 
     console.log("ABI content:", votingAbi.abi);
     console.log("Deployed Address:", deployedAddress.address);
-
-    // Initialize wallet and contract instance
     this.initializeWallet().then(() => {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       this.contract = new ethers.Contract(deployedAddress.address, votingAbi.abi, signer);
-
-      // Listen for events
       eventBus.on("newProposalCreated", this.fetchProposals);
       this.contract.on("ProposalDeleted", this.handleProposalDeleted);
 
       this.contract.on("VoteCast", (proposalId, voter, weight, voteFor) => {
         console.log(`Vote Cast! ProposalId: ${proposalId}, Voter: ${voter}, Weight: ${weight}, VoteFor: ${voteFor}`);
-        // Update the vote count when a vote is cast
         this.updateVoteCount(proposalId, voteFor);
       });
 
@@ -71,7 +66,6 @@ export default {
     });
   },
   beforeDestroy() {
-    // Remove event listeners
     if (this.contract) {
       eventBus.off("newProposalCreated", this.fetchProposals);
       this.contract.off("ProposalDeleted", this.handleProposalDeleted);
@@ -79,6 +73,9 @@ export default {
   },
 
   methods: {
+    async clearProposals() {
+  this.proposals = [];
+},
     async checkIfAdmin(adminAddress) {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
@@ -123,9 +120,6 @@ export default {
           durationInMinutes: proposal.durationInMinutes.toString(),
           voted: false
         }));
-        const proposalList = []
-        proposalsList.push(proposalList)
-        console.log("Proposals List:", proposalsList);
         this.proposals = proposalsList;
 
       } catch (error) {
