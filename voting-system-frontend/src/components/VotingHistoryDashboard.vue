@@ -14,6 +14,14 @@
       <p><strong>Voting Period:</strong> {{ history.startTime }} to {{ history.endTime }}</p>
       <p><strong>Quorum Met:</strong> {{ history.quorumMet ? "Yes" : "No" }}</p>
     </div>
+
+    <!-- Shareholder voting activity -->
+    <h3>My Voting Activity</h3>
+    <div v-for="activity in votingActivity" :key="activity.proposalId" class="activity-card">
+      <h4>Proposal ID: {{ activity.proposalId }}</h4>
+      <p><strong>Voted For:</strong> {{ activity.votedFor ? "Yes" : "No" }}</p>
+      <p><strong>Vote Weight:</strong> {{ activity.voteWeight }}</p>
+    </div>
   </div>
 </template>
 
@@ -30,6 +38,7 @@ export default {
       web3: null,
       contract: null,
       account: "",
+      votingActivity: [],
     };
   },
   created() {
@@ -43,7 +52,8 @@ export default {
       const accounts = await this.web3.eth.getAccounts();
       this.account = accounts[0];
       this.contract = this.getVotingContract();
-      // this.fetchVotingHistory();
+      this.fetchVotingHistory();
+      this.fetchVotingActivity();
     },
 
     async fetchVotingHistory() {
@@ -72,6 +82,19 @@ export default {
         }
       } catch (err) {
         console.error("Error fetching voting history:", err);
+      }
+    },
+
+    async fetchVotingActivity() {
+      try {
+        const votingHistory = await this.contract.methods.getVotingHistory(this.account).call();
+        this.votingActivity = votingHistory.map(record => ({
+          proposalId: record.proposalId,
+          votedFor: record.votedFor,
+          voteWeight: record.voteWeight.toString()
+        }));
+      } catch (err) {
+        console.error("Error fetching voting activity:", err);
       }
     },
 

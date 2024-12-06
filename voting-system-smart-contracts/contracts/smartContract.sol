@@ -206,6 +206,7 @@ contract VotingContract {
         return proposalCount;
     }
 
+    event VoteProgressUpdated(uint256 proposalId, uint256 votesFor, uint256 votesAgainst);
     function castVote(uint256 proposalId, bool voteFor) public {
         require(!voted[msg.sender], "You have already voted");
         require(proposals[proposalId].active, "Proposal is not active");
@@ -234,6 +235,7 @@ contract VotingContract {
         governanceToken.mint(msg.sender, rewardAmount);
         emit VoteCast(proposalId, msg.sender, voteWeight, voteFor);
         emit RewardIssued(msg.sender, rewardAmount);
+        emit VoteProgressUpdated(proposalId, proposals[proposalId].votesFor, proposals[proposalId].votesAgainst);
     }
 
     event ProposalDeleted(uint256 indexed proposalId);
@@ -291,5 +293,22 @@ contract VotingContract {
 
         proposal.active = false;
         isVotingPeriodActive = false;
+    }
+
+   function getPastProposals() public view returns (Proposal[] memory, ProposalOutcome[] memory) {
+    Proposal[] memory pastProposals = new Proposal[](proposalCount);
+    ProposalOutcome[] memory outcomes = new ProposalOutcome[](proposalCount);
+
+    for (uint256 i = 0; i < proposalCount; i++) {
+        pastProposals[i] = proposals[i];
+        outcomes[i] = proposalOutcomes[i];
+    }
+
+        return (pastProposals, outcomes);
+    }
+
+    // retrieve a shareholder's voting history (addition to above)
+    function getVotingHistory(address shareholder) public view returns (VotingRecord[] memory) {
+        return votingHistory[shareholder];
     }
 }

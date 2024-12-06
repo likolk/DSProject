@@ -61,6 +61,15 @@ export default {
         this.updateVoteCount(proposalId, voteFor);
       });
 
+      this.contract.on("VoteProgressUpdated", (proposalId, votesFor, votesAgainst) => {
+        console.log(`Vote Progress Updated! ProposalId: ${proposalId}, VotesFor: ${votesFor}, VotesAgainst: ${votesAgainst}`);
+        const proposal = this.proposals.find(p => p.id === proposalId);
+        if (proposal) {
+          proposal.votesFor = votesFor.toString();
+          proposal.votesAgainst = votesAgainst.toString();
+        }
+      });
+
     }).catch((err) => {
       console.error("Error during wallet initialization:", err);
     });
