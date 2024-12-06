@@ -149,6 +149,7 @@ function createProposal(
     // }
 
     function registerShareholder(address account, uint256 _shares) external {
+        require(!isVotingPeriodActive, "Cannot register shareholders during voting period");
         shares[account] = _shares;
         tokens[account] = _shares;  // Convert shares to tokens (1:1 mapping)
     }
@@ -185,7 +186,7 @@ function createProposal(
     }
 
     function updateShares(address voter, uint256 newShares) public {
-        // require(!isVotingPeriodActive, "cannot update shares during ongoing votong period");
+        require(!isVotingPeriodActive, "Cannot update shares during voting period");
         shares[voter] = newShares;
         emit SharesUpdated(voter, newShares);
     }
@@ -201,29 +202,30 @@ function createProposal(
         return proposalCount;
     }
 
-    function castVote(uint256 proposalId, bool voteFor) public {
-        require(!voted[msg.sender], "You have already voted");
-        require(proposals[proposalId].active, "Proposal is not active");
+function castVote(uint256 proposalId, bool voteFor) public {
+    require(!voted[msg.sender], "You have already voted");
+    require(proposals[proposalId].active, "Proposal is not active");
 
-        uint256 voteWeight = shares[msg.sender];
-        require(voteWeight > 0, "You must hold shares to vote");
+    uint256 voteWeight = calculateVotingWeight(msg.sender);
+    require(voteWeight > 0, "You must hold shares to vote");
 
-        if (voteFor) {
-            proposals[proposalId].votesFor += voteWeight;
-        } else {
-            proposals[proposalId].votesAgainst += voteWeight;
-        }
-
-        votingHistory[msg.sender].push(VotingRecord({
-            proposalId: proposalId,
-            votedFor: voteFor,
-            voteWeight: voteWeight
-        }));
-
-        voted[msg.sender] = true;  
-
-        emit VoteCast(proposalId, msg.sender, voteWeight, voteFor);
+    if (voteFor) {
+        proposals[proposalId].votesFor += voteWeight;
+    } else {
+        proposals[proposalId].votesAgainst += voteWeight;
     }
+
+    votingHistory[msg.sender].push(VotingRecord({
+        proposalId: proposalId,
+        votedFor: voteFor,
+        voteWeight: voteWeight
+    }));
+
+    voted[msg.sender] = true;  
+    isVotingPeriodActive = true;
+
+    emit VoteCast(proposalId, msg.sender, voteWeight, voteFor);
+}
 
 event ProposalDeleted(uint256 indexed proposalId);
 
@@ -232,4 +234,48 @@ event ProposalDeleted(uint256 indexed proposalId);
         proposals[proposalId].active = false;
         emit ProposalDeleted(proposalId);
     }
+
+    function calculateVotingWeight(address voter) public view returns (uint256) {
+        require(totalShares > 0, "Total shares must be greater than zero");
+        return (shares[voter] * 100) / totalShares;
+    }
+
+    function calculateQuorum(uint256 proposalId) public view returns (uint256) {
+    Proposal storage proposal = proposals[proposalId];
+    if (proposal.quorumType == uint8(QuorumType.SimpleMajority)) {
+        return totalShares / 2;
+    } else if (proposal.quorumType == uint8(QuorumType.TwoThirds)) {
+        return (totalShares * 2) / 3;
+    } else if (proposal.quorumType == uint8(QuorumType.ThreeQuarters)) {
+        return (totalShares * 3) / 4;
+    } else if (proposal.quorumType == uint8(QuorumType.Unanimous)) {
+        return totalShares;
+    } else {
+        revert("Invalid quorum type");
+    }
+}
+
+function finalizeProposal(uint256 proposalId) public {
+    Proposal storage proposal = proposals[proposalId];
+    require(block.timestamp >= proposal.endTime, "Voting period has not ended");
+    require(proposal.active, "Proposal is not active");
+
+    uint256 quorum = calculateQuorum(proposalId);
+    if (proposal.votesFor >= quorum) {
+        proposalOutcomes[proposalId] = ProposalOutcome({
+            passed: true,
+            votesFor: proposal.votesFor,
+            votesAgainst: proposal.votesAgainst
+        });
+    } else {
+        proposalOutcomes[proposalId] = ProposalOutcome({
+            passed: false,
+            votesFor: proposal.votesFor,
+            votesAgainst: proposal.votesAgainst
+        });
+    }
+
+    proposal.active = false;
+    isVotingPeriodActive = false;
+}
 }
