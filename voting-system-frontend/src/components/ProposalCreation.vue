@@ -38,7 +38,7 @@ export default {
       proposalDescription: "",
       durationInMinutes: null,
       quorumType: "",
-      contractAddress: deployedAddress.address,
+      contractAddress: deployedAddress.address
     };
   },
   methods: {
