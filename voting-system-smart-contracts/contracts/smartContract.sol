@@ -1,5 +1,5 @@
 // // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.26;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./VotingWithRewards.sol";
@@ -13,8 +13,7 @@ mapping(address => uint256) public shares;
     mapping(address => bool) public admins;
     uint256 public totalShares;
     mapping(address => bool) public voted;
-
-
+    address[] public adminAddresses;
 
 
     enum QuorumType {
@@ -28,7 +27,7 @@ mapping(address => uint256) public shares;
 struct Proposal {
     string title;
     string description;
-    uint256 durationInMinutes;
+    uint8 durationInMinutes;
     uint8 quorumType;
     uint256 endTime;
     address proposer;
@@ -39,7 +38,7 @@ struct Proposal {
 
 
     Proposal[] public proposals;
-    uint256 public proposalCount;
+    uint8 public proposalCount;
 
     struct VotingRecord {
         uint256 proposalId;
@@ -56,13 +55,13 @@ struct Proposal {
     bool public isVotingPeriodActive;
     uint256 public votingEndTime;
 
-    GovernanceToken public governanceToken;
+    // GovernanceToken public governanceToken;
 
     event ProposalCreated(
         uint256 proposalId,
         string title,
         string description,
-        uint256 durationInMinutes,
+        uint8 durationInMinutes,
         uint8 quorumType,
         uint256 endTime,
         address proposer
@@ -77,11 +76,16 @@ struct Proposal {
     event RewardIssued(address voter, uint256 rewardAmount);
 
     // constructor to initialize admins
-    constructor(address[] memory initialAdmins, address _tokenAddress) {
-            governanceToken = GovernanceToken(_tokenAddress);
+    constructor(address[] memory initialAdmins, address _tokenAddress) payable {
+            // governanceToken = GovernanceToken(_tokenAddress);
+            require(msg.value >= 1 ether, "You must send at least 1 ETH to deploy the contract");
+            require(initialAdmins.length > 0, "Initial admins required");
+            require(_tokenAddress != address(0), "Invalid token address");
+
 
             for (uint i = 0; i < initialAdmins.length; i++) {
                 admins[initialAdmins[i]] = true;
+                adminAddresses.push(initialAdmins[i]); 
             }
         }
 
@@ -93,13 +97,14 @@ struct Proposal {
 function createProposal(
     string memory title,
     string memory description,
-    uint256 durationInMinutes,
+    uint8 durationInMinutes,
     uint8 quorumType
 ) public payable {
     require(msg.value == 1 ether, "Must send 1 ETH to create a proposal");
 
     uint256 endTime = block.timestamp + (durationInMinutes * 1 minutes);
 
+    // Push new proposal to the proposals array
     proposals.push(Proposal({
         title: title,
         description: description,
@@ -110,14 +115,19 @@ function createProposal(
         active: true,
         votesFor: 0,
         votesAgainst: 0
-
     }));
 
-    uint256 proposalId = proposals.length - 1;
+    // Make sure proposalCount is being incremented
     proposalCount++;
 
-    emit ProposalCreated(proposalId, title, description, durationInMinutes, quorumType, endTime, msg.sender);
+    emit ProposalCreated(proposalCount - 1, title, description, durationInMinutes, quorumType, endTime, msg.sender);
 }
+
+    receive() external payable {}
+
+    // Fallback function to handle unexpected calls or Ether transfers with data
+    fallback() external payable {
+    }
 
     function addAdmin(address newAdmin) public onlyAdmin {
         admins[newAdmin] = true;
@@ -197,7 +207,7 @@ function createProposal(
         return proposalOutcomes[proposalId];
     }
 
-    function getProposalsCount() public view returns (uint256) {
+    function getProposalsCount() public view returns (uint8) {
         return proposalCount;
     }
 
@@ -227,9 +237,13 @@ function createProposal(
 
 event ProposalDeleted(uint256 indexed proposalId);
 
-    function deleteProposal(uint256 proposalId) external onlyAdmin {
+    function deleteProposal(uint8 proposalId) external onlyAdmin {
         require(proposalId < proposals.length, "Invalid proposal ID");
         proposals[proposalId].active = false;
         emit ProposalDeleted(proposalId);
+    }
+
+    function getAdmins() public view returns (address[] memory) {
+        return adminAddresses;
     }
 }

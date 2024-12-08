@@ -14,7 +14,9 @@ async function main() {
     const VotingContract = await ethers.getContractFactory("VotingContract");
 
     try {
-        const votingContract = await VotingContract.deploy(initialAdmins, tokenAddress);
+        const votingContract = await VotingContract.deploy(initialAdmins, tokenAddress, {
+            gasLimit: 8000000
+        });
         await votingContract.deploymentTransaction().wait();
 
         const contractAddress = votingContract.target;
