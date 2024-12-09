@@ -210,5 +210,12 @@ event ProposalDeleted(uint256 indexed proposalId);
     // check if proposal is active
     function isProposalActive(uint256 proposalId) public view returns (bool) {
         return proposals[proposalId].active;
+    }   
+    // this is for real time voting
+    function getProposalVotes(uint256 proposalId) public view returns (uint256 votesFor, uint256 votesAgainst, bool active) {
+        require(proposalId < proposals.length, "Invalid proposal ID");
+        Proposal storage proposal = proposals[proposalId];
+        return (proposal.votesFor, proposal.votesAgainst, proposal.active);
     }
+
 }
