@@ -12,8 +12,8 @@
 
       </div>
       <div class="vote-buttons">
-        <button @click="vote(proposal.id, 'yes')" class="vote-button yes">Yes</button>
-        <button @click="vote(proposal.id, 'no')" class="vote-button no">No</button>
+        <button @click="vote(proposal.id, 'yes')" :disabled="proposal.voted" class="vote-button yes">Yes</button>
+<button @click="vote(proposal.id, 'no')" :disabled="proposal.voted" class="vote-button no">No</button>
         <button @click="deleteProposal(proposal.id)" class="delete-button" v-if="checkIfAdmin">Delete</button>
       </div>
       <div class="vote-status">
@@ -37,8 +37,6 @@ export default {
     return {
       proposals: [],
       isAdmin: false,
-      // totalVotes: 0,
-      // votingStatus: false,
     };
   },
   mounted() {
@@ -73,6 +71,7 @@ export default {
           } else {
             proposal.votesAgainst = (parseInt(proposal.votesAgainst) + parseInt(weight)).toString();
           }
+          proposal.voted = true;
           this.$forceUpdate();
         }
       });
