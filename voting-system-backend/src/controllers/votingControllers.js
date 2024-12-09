@@ -97,8 +97,6 @@ async function getTotalShares(req, res) {
   }
 }
 
-
-// for the frontend, query /api/voter/:address/reward to display how many governance tokens the voter has earned.
 async function getRewardBalanceController(req, res) {
   const {address} = req.params;
   try {
@@ -145,7 +143,6 @@ async function checkQuorum(req, res) {
   }
 }
 
-// delete proposal
 async function deleteProposalController(req, res) {
   const { proposalId } = req.params;
   try {

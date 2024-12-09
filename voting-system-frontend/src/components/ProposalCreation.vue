@@ -101,7 +101,7 @@ export default {
       const contract = new ethers.Contract(this.contractAddress, votingAbi.abi, signer);
 
       try {
-        const valueInWei = ethers.utils.parseEther('1'); // Convert 1 ETH to Wei using ethers
+        const valueInWei = ethers.utils.parseEther('1'); 
 
         const tx = await contract.createProposal(
           this.proposalTitle,
@@ -111,8 +111,7 @@ export default {
           { value: valueInWei, gasLimit: 500000 }
         );
 
-        console.log("Transaction receipt:", tx); // Log the transaction receipt for debugging
-        // Emit event when the proposal is successfully created
+        console.log("Transaction receipt:", tx);
         eventBus.emit('newProposalCreated');
         alert("Proposal created successfully!");
       } catch (err) {

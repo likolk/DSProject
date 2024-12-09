@@ -1,5 +1,5 @@
 // // SPDX-License-Identifier: MIT
-// pragma solidity ^0.8.26;
+pragma solidity ^0.8.26;
 
 // // this file basically is helpful for the following feature:
 // // Shareholder Rewards for Voting: Reward shareholders with tokens for participating in votes (e.g., governance tokens or reputation points).(we will need to issue rewards (e.g., governance tokens or reputation points)

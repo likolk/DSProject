@@ -80,17 +80,11 @@ export default {
   async created() {
     this.web3 = new Web3(window.ethereum);
     this.contract = this.getVotingContract(this.web3);
-
-    // Load user profile
     await this.loadUserProfile();
-    // Listen for account changes
     window.ethereum.on('accountsChanged', this.handleAccountChange);
-
-    // Initialize chart
     this.initializeChart();
   },
   beforeDestroy() {
-    // Remove the event listener when the component is destroyed
     window.ethereum.removeListener('accountsChanged', this.handleAccountChange);
   },
   methods: {
@@ -118,15 +112,13 @@ export default {
           return;
         }
 
-        const wallet = accounts[0]; // The wallet address of the logged-in user
+        const wallet = accounts[0]; 
         console.log("User Wallet:", wallet);
 
-        // Fetch the user's ETH balance in Wei and convert it to ETH
         const balanceWei = await this.web3.eth.getBalance(wallet);
         const balanceEth = this.web3.utils.fromWei(balanceWei, "ether");
         console.log("ETH Balance:", balanceEth);
 
-        // Set the user profile with wallet address and ETH balance
         this.userProfile = {
           name: wallet,
           wallet,
