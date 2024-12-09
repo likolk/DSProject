@@ -10,7 +10,6 @@ mapping(address => uint256) public shares;
     mapping(address => VotingRecord[]) public votingHistory;
     mapping(uint256 => ProposalOutcome) public proposalOutcomes;
     mapping(address => bool) public admins;
-    uint256 public totalShares;
     mapping(uint256 => mapping(address => bool)) public voted;
     address[] public adminAddresses;
 
@@ -163,9 +162,7 @@ function createProposal(
     }
 
 
-    function getProposalOutcome(
-        uint256 proposalId
-    ) public view returns (ProposalOutcome memory) {
+    function getProposalOutcome(uint256 proposalId) public view returns (ProposalOutcome memory) {
         return proposalOutcomes[proposalId];
     }
 
@@ -203,8 +200,9 @@ event ProposalDeleted(uint256 indexed proposalId);
 
     function deleteProposal(uint8 proposalId) external onlyAdmin {
         require(proposalId < proposals.length, "Invalid proposal ID");
-        proposals[proposalId].active = false;
+        require(proposals[proposalId].active, "Proposal is not active");
         emit ProposalDeleted(proposalId);
+        proposals[proposalId].active = false;
     }
 
     function getAdmins() public view returns (address[] memory) {
