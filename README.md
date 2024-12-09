@@ -46,9 +46,9 @@ Not Implemented 😔:
 
 ## How to run the project
 
-To run the project, we will need 4 terminals: one for starting the backend, one for the frontend , one for starting a local Ethereum network node designed for development and one to compile and deploy the contracts.
+To run the project, we will need 3 terminals: one for starting the backend, one for the frontend , one for starting a local Ethereum network node designed for development and Remix IDE to compile and deploy the contracts.
 
-For the backend: cd voting-system-backend  npm run dev
+For the backend: cd voting-system-backend -> npm run dev
 
 For the frontend: cd voting-system-frontend -> npm run serve
 
