@@ -7,7 +7,6 @@ import "./VotingWithRewards.sol";
 contract VotingContract {
 mapping(address => uint256) public shares; 
     mapping(address => uint256) public tokens; 
-    // mapping(uint256 => Proposal) public proposals;
     mapping(address => VotingRecord[]) public votingHistory;
     mapping(uint256 => ProposalOutcome) public proposalOutcomes;
     mapping(address => bool) public admins;
@@ -104,7 +103,6 @@ function createProposal(
 
     uint256 endTime = block.timestamp + (durationInMinutes * 1 minutes);
 
-    // Push new proposal to the proposals array
     proposals.push(Proposal({
         title: title,
         description: description,
@@ -116,16 +114,14 @@ function createProposal(
         votesFor: 0,
         votesAgainst: 0
     }));
-
-    // Make sure proposalCount is being incremented
     proposalCount++;
 
     emit ProposalCreated(proposalCount - 1, title, description, durationInMinutes, quorumType, endTime, msg.sender);
 }
-
+    // fallback function to handle unexpected calls or Ether transfers with data
     receive() external payable {}
 
-    // Fallback function to handle unexpected calls or Ether transfers with data
+    // fallback function to handle unexpected calls or Ether transfers with data
     fallback() external payable {
     }
 
@@ -137,43 +133,30 @@ function createProposal(
     return proposals;
 }
 
-
-    // Optional: Function to remove an admin dynamically
     function removeAdmin(address admin) public onlyAdmin {
         admins[admin] = false;
     }
 
-    // check if the user is an admin
     function isAdmin(address user) public view returns (bool) {
         return admins[user];
     }
 
-
-    // function registerShareholder(address voter, uint256 shareCount) public {
-    //     require(
-    //         !isVotingPeriodActive,
-    //         "Hey its an active voting period, you cannot vote now."
-    //     );
-    //     shares[voter] = shareCount;
-    //     totalShares += shareCount;
-    // }
-
     function registerShareholder(address account, uint256 _shares) external {
         shares[account] = _shares;
-        tokens[account] = _shares;  // Convert shares to tokens (1:1 mapping)
+        tokens[account] = _shares; 
     }
 
     function vote(address account, uint256 voteAmount) external {
         require(tokens[account] >= voteAmount, "Not enough tokens to vote");
         tokens[account] -= voteAmount;
 
-        // Update the total shares
+        // update the total shares
         totalShares -= voteAmount;
 
-        // Update the proposal vote count
+        // update the proposal vote count
         proposals[0].votesFor += voteAmount;
 
-        // Record the vote
+        // record the vote
         votingHistory[account].push(VotingRecord({
             proposalId: 0,
             votedFor: true,
