@@ -10,16 +10,17 @@ Features:
      Example: A person with 10% of shares has 10% of the total voting power and his vote will count as 10% of the total votes.
 
 2. Share-Based Registration:
-     Shareholders register using their Ethereum address, and their voting power is calculated based on their shares.
-     Optionally, integrate a smart contract to tokenize shares or link the system with an existing tokenized share registry.
+     Shareholders register using their Ethereum address, and their voting power is calculated based on their shares. 
+     Integrate a smart contract to tokenize shares or link the system with an existing tokenized share registry.
+     We have a 1-to-1 mapping of shares and tokens, meaning 100 available shares are mapped to 100 tokens respectively.
 
 3. Flexible Decision Thresholds:
-     Support for different quorum requirements (e.g., simple majority, 2/3 majority) based on the vote type.
+     Support for different quorum requirements (4 types of quorum: 50%, 67%, 75%, 100%) based on the vote type.
 
 4. Time-Locked Shares:
      Prevent share transfers from affecting voting power during an active voting period.
 
-5. Allow shareholders with a minimum percentage of shares (e.g., 5%) to create proposals for voting. This ensures inclusivity while preventing spam proposals from minor shareholders.
+5. Allow shareholders with a minimum percentage of shares (e.g., 50%) to create proposals for voting. This ensures inclusivity while preventing spam proposals from minor shareholders. In our case, to create a proposal you need to be an admin (look at point 9) and to be an admin you need at least 50% of shares/tokens - thus we have only 1 admin who manages the voting altogether.
 
 6. Voting History Dashboard
 	Provide a simple dashboard showing:
@@ -27,20 +28,20 @@ Features:
 	(Each shareholder's voting activity (optional))
 
 7. Real-Time Progress: Show real-time progress of voting.
-Example: 35% of total shares have voted; 50% required for quorum.
 
 8. Shareholder Rewards for Voting
 Reward shareholders with tokens for participating in votes (e.g., governance tokens or reputation points).
 Role-Based Admin Controls
 
-Not Implemented (yet?)
+9. Implement roles for managing proposals and elections:
+     Admins: Can manage voting events.
+     Non-Admins: Can view detailed reports but cannot modify anything.
 
-9. Transparency with Anonymity:
+Not Implemented"
+
+10. Transparency with Anonymity:
      Display aggregated voting results while maintaining the privacy of individual voters
 
-10. Implement roles for managing proposals and elections:
-     Admins: Can oversee and manage voting events.
-     Auditors: Can view detailed reports but cannot modify anything.
 
 
 ------------------
