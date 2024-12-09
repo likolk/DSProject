@@ -154,7 +154,7 @@ function createProposal(
     }
 
     function updateShares(address voter, uint256 newShares) public {
-        // require(!isVotingPeriodActive, "cannot update shares during ongoing votong period");
+        require(!isVotingPeriodActive, "cannot update shares during ongoing votong period");
         shares[voter] = newShares;
         emit SharesUpdated(voter, newShares);
     }
@@ -218,4 +218,9 @@ event ProposalDeleted(uint256 indexed proposalId);
         return (proposal.votesFor, proposal.votesAgainst, proposal.active);
     }
 
+    // set voting period to active and non active
+    function setVotingPeriod(bool active, uint256 durationInMinutes) public onlyAdmin {
+        isVotingPeriodActive = active;
+        votingEndTime = block.timestamp + (durationInMinutes * 1 minutes);
+    }
 }
