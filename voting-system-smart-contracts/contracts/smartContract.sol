@@ -149,9 +149,7 @@ function createProposal(
         return tokens[account];
     }
 
-    function calculateReward(
-        uint256 voteWeight
-    ) internal pure returns (uint256) {
+    function calculateReward(uint256 voteWeight) internal pure returns (uint256) {
         return voteWeight / 100;
     }
 

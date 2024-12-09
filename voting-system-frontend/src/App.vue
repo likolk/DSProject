@@ -7,5 +7,5 @@ import { RouterView } from 'vue-router';
 </template>
 
 <style>
-/* Optionally, you can remove all styles here if they are no longer relevant */
+
 </style>

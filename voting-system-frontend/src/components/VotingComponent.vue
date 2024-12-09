@@ -50,19 +50,15 @@ export default {
     console.log("ABI content:", votingAbi.abi);
     console.log("Deployed Address:", deployedAddress.address);
 
-    // Initialize wallet and contract instance
     this.initializeWallet().then(() => {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       this.contract = new ethers.Contract(deployedAddress.address, votingAbi.abi, signer);
-
-      // Listen for events
       eventBus.on("newProposalCreated", this.fetchProposals);
       this.contract.on("ProposalDeleted", this.handleProposalDeleted);
 
       this.contract.on("VoteCast", (proposalId, voter, weight, voteFor) => {
         console.log(`Vote Cast! ProposalId: ${proposalId}, Voter: ${voter}, Weight: ${weight}, VoteFor: ${voteFor}`);
-        // Update the vote count when a vote is cast
         this.updateVoteCount(proposalId, voteFor);
       });
 
@@ -71,7 +67,7 @@ export default {
     });
   },
   beforeDestroy() {
-    // Remove event listeners
+    // remove event listeners
     if (this.contract) {
       eventBus.off("newProposalCreated", this.fetchProposals);
       this.contract.off("ProposalDeleted", this.handleProposalDeleted);
@@ -99,7 +95,7 @@ export default {
       const contract = new ethers.Contract(deployedAddress.address, votingAbi.abi, signer);
       try {
         await contract.castVote(proposalId, voteOption === 'yes');
-        this.fetchProposals();  // Refresh the proposals list after voting
+        this.fetchProposals();  
       } catch (err) {
         console.error("Voting failed:", err);
       }
@@ -178,8 +174,9 @@ export default {
         const contract = new ethers.Contract(deployedAddress.address, votingAbi.abi, signer);
         try {
             const tx = await contract.deleteProposal(proposalId);
-            await tx.wait(); // Wait for the transaction to be mined
-            this.fetchProposals(); // Refresh the proposals list after deletion
+             // wait for the transaction to be mined
+            await tx.wait();
+            this.fetchProposals(); 
         } catch (error) {
             console.error("Error deleting proposal:", error);
             alert("Failed to delete the proposal.");
