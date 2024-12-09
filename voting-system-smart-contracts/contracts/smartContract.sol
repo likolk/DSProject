@@ -149,10 +149,6 @@ function createProposal(
         return tokens[account];
     }
 
-    function calculateReward(uint256 voteWeight) internal pure returns (uint256) {
-        return voteWeight / 100;
-    }
-
     function updateShares(address voter, uint256 newShares) public {
         require(!isVotingPeriodActive, "cannot update shares during ongoing votong period");
         shares[voter] = newShares;
@@ -192,6 +188,9 @@ function createProposal(
         voted[proposalId][msg.sender] = true;
 
         emit VoteCast(proposalId, msg.sender, voteWeight, voteFor);
+
+        issueReward(msg.sender, voteWeight);
+
 
         if (checkQuorum(proposalId)) {
             Proposal storage proposal = proposals[proposalId];
@@ -252,4 +251,25 @@ event ProposalDeleted(uint256 indexed proposalId);
         return proposal.votesFor > quorum;
     }
 
+    function getVotingHistory(address voter) external view returns (VotingRecord[] memory) {
+        return votingHistory[voter];
+    }
+
+    function calculateReward(uint256 voteWeight) internal pure returns (uint256) {
+        return voteWeight / 100;
+    }
+
+    function issueReward(address voter, uint256 voteWeight) internal {
+        uint256 rewardAmount = calculateReward(voteWeight);
+        // GovernanceToken(governanceTokenAddress).mint(voter, rewardAmount);
+        emit RewardIssued(voter, rewardAmount);
+    }
+
+    // transfer shares from one account to another
+    function transferShares(address from, address to, uint256 amount) public {
+        require(!isVotingPeriodActive, "cannot update shares during ongoing votong period");
+        require(shares[from] >= amount, "Insufficient shares");
+        shares[from] -= amount;
+        shares[to] += amount;
+    }
 }
