@@ -11,7 +11,7 @@ mapping(address => uint256) public shares;
     mapping(uint256 => ProposalOutcome) public proposalOutcomes;
     mapping(address => bool) public admins;
     uint256 public totalShares;
-    mapping(address => bool) public voted;
+    mapping(uint256 => mapping(address => bool)) public voted;
     address[] public adminAddresses;
 
 
@@ -146,27 +146,6 @@ function createProposal(
         tokens[account] = _shares; 
     }
 
-    function vote(address account, uint256 voteAmount) external {
-        require(tokens[account] >= voteAmount, "Not enough tokens to vote");
-        tokens[account] -= voteAmount;
-
-        // update the total shares
-        totalShares -= voteAmount;
-
-        // update the proposal vote count
-        proposals[0].votesFor += voteAmount;
-
-        // record the vote
-        votingHistory[account].push(VotingRecord({
-            proposalId: 0,
-            votedFor: true,
-            voteWeight: voteAmount
-        }));
-
-        emit VoteCast(0, account, voteAmount, true);
-
-    }
-
     function getTokens(address account) external view returns (uint256) {
         return tokens[account];
     }
@@ -195,7 +174,8 @@ function createProposal(
     }
 
     function castVote(uint256 proposalId, bool voteFor) public {
-        require(!voted[msg.sender], "You have already voted");
+        // require(!voted[msg.sender], "You have already voted");
+        require(!voted[proposalId][msg.sender], "You have already voted");
         require(proposals[proposalId].active, "Proposal is not active");
 
         uint256 voteWeight = shares[msg.sender];
@@ -213,7 +193,8 @@ function createProposal(
             voteWeight: voteWeight
         }));
 
-        voted[msg.sender] = true;  
+        // voted[msg.sender] = true;  
+        voted[proposalId][msg.sender] = true;
 
         emit VoteCast(proposalId, msg.sender, voteWeight, voteFor);
     }
@@ -228,5 +209,10 @@ event ProposalDeleted(uint256 indexed proposalId);
 
     function getAdmins() public view returns (address[] memory) {
         return adminAddresses;
+    }
+
+    // check if proposal is active
+    function isProposalActive(uint256 proposalId) public view returns (bool) {
+        return proposals[proposalId].active;
     }
 }
