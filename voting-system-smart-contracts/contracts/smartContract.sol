@@ -151,6 +151,7 @@ function createProposal(
 
     function updateShares(address voter, uint256 newShares) public {
         require(!isVotingPeriodActive, "cannot update shares during ongoing votong period");
+        require(newShares <= 100, "Shares cannot exceed 100");
         shares[voter] = newShares;
         emit SharesUpdated(voter, newShares);
     }
