@@ -14,7 +14,7 @@
       <div class="vote-buttons">
         <button @click="vote(proposal.id, 'yes')" class="vote-button yes">Yes</button>
         <button @click="vote(proposal.id, 'no')" class="vote-button no">No</button>
-        <button  @click="deleteProposal(proposal.id)"  class="delete-button" v-if="checkIfAdmin">Delete</button>
+        <button @click="deleteProposal(proposal.id)" class="delete-button" v-if="checkIfAdmin">Delete</button>
       </div>
       <div class="vote-status">
         <p>Yes Votes: {{ proposal.votesFor }}</p>
@@ -44,7 +44,7 @@ export default {
   mounted() {
 
     const adminAddress = deployedAddress.address;
-  this.checkIfAdmin(adminAddress);
+    this.checkIfAdmin(adminAddress);
 
 
     console.log("ABI content:", votingAbi.abi);
@@ -57,10 +57,26 @@ export default {
       eventBus.on("newProposalCreated", this.fetchProposals);
       this.contract.on("ProposalDeleted", this.handleProposalDeleted);
 
-      this.contract.on("VoteCast", (proposalId, voter, weight, voteFor) => {
-        console.log(`Vote Cast! ProposalId: ${proposalId}, Voter: ${voter}, Weight: ${weight}, VoteFor: ${voteFor}`);
-        this.updateVoteCount(proposalId, voteFor);
+      // real-time voting updates
+      this.contract.on("ProposalCreated", (proposalId, title, description) => {
+        console.log(`New Proposal Created! ProposalId: ${proposalId}, Title: ${title}, Description: ${description}`);
+        this.fetchProposals();
       });
+
+      this.contract.on("VoteCast", (proposalId, voter, weight, voteFor) => {
+        console.log(`VoteCast Event: Proposal ID ${proposalId}, Voter: ${voter}, Weight: ${weight}, Vote For: ${voteFor}`);
+
+        const proposal = this.proposals.find(p => p.id === proposalId.toNumber());
+        if (proposal) {
+          if (voteFor) {
+            proposal.votesFor = (parseInt(proposal.votesFor) + parseInt(weight)).toString();
+          } else {
+            proposal.votesAgainst = (parseInt(proposal.votesAgainst) + parseInt(weight)).toString();
+          }
+          this.$forceUpdate();
+        }
+      });
+
 
     }).catch((err) => {
       console.error("Error during wallet initialization:", err);
@@ -75,19 +91,19 @@ export default {
   },
 
   methods: {
-    
+
 
     async checkIfAdmin(adminAddress) {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    const userAddress = await signer.getAddress();
-    
-    if (userAddress.toLowerCase() === adminAddress.toLowerCase()) {
-      this.isAdmin = true; 
-    } else {
-      this.isAdmin = false;
-    }
-  },
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const userAddress = await signer.getAddress();
+
+      if (userAddress.toLowerCase() === adminAddress.toLowerCase()) {
+        this.isAdmin = true;
+      } else {
+        this.isAdmin = false;
+      }
+    },
 
     async vote(proposalId, voteOption) {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -95,7 +111,7 @@ export default {
       const contract = new ethers.Contract(deployedAddress.address, votingAbi.abi, signer);
       try {
         await contract.castVote(proposalId, voteOption === 'yes');
-        this.fetchProposals();  
+        this.fetchProposals();
       } catch (err) {
         console.error("Voting failed:", err);
       }
@@ -169,18 +185,18 @@ export default {
       }
     },
     async deleteProposal(proposalId) {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const signer = provider.getSigner();
-        const contract = new ethers.Contract(deployedAddress.address, votingAbi.abi, signer);
-        try {
-            const tx = await contract.deleteProposal(proposalId);
-             // wait for the transaction to be mined
-            await tx.wait();
-            this.fetchProposals(); 
-        } catch (error) {
-            console.error("Error deleting proposal:", error);
-            alert("Failed to delete the proposal.");
-        }
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(deployedAddress.address, votingAbi.abi, signer);
+      try {
+        const tx = await contract.deleteProposal(proposalId);
+        // wait for the transaction to be mined
+        await tx.wait();
+        this.fetchProposals();
+      } catch (error) {
+        console.error("Error deleting proposal:", error);
+        alert("Failed to delete the proposal.");
+      }
     },
 
     updateVoteCount(proposalId, voteFor) {
@@ -191,14 +207,14 @@ export default {
         } else {
           proposal.votesAgainst = (parseInt(proposal.votesAgainst) + 1).toString();
         }
-        proposal.voted = true; 
+        proposal.voted = true;
       }
     },
-  handleProposalDeleted(event) {
-    const deletedProposalId = event.args.proposalId.toNumber();
-    this.proposals = this.proposals.filter((proposal) => proposal.id !== deletedProposalId);
+    handleProposalDeleted(event) {
+      const deletedProposalId = event.args.proposalId.toNumber();
+      this.proposals = this.proposals.filter((proposal) => proposal.id !== deletedProposalId);
+    },
   },
-},
 
 }
 </script>
@@ -326,12 +342,12 @@ h3 {
 }
 
 .delete-button {
-    background-color: #ff9800;
-    color: white;
+  background-color: #ff9800;
+  color: white;
 }
 
 .delete-button:hover {
-    background-color: #fb8c00;
-    transform: translateY(-2px);
+  background-color: #fb8c00;
+  transform: translateY(-2px);
 }
 </style>

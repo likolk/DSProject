@@ -154,7 +154,7 @@ function createProposal(
     }
 
     function updateShares(address voter, uint256 newShares) public {
-        // require(!isVotingPeriodActive, "cannot update shares during ongoing votong period");
+        require(!isVotingPeriodActive, "cannot update shares during ongoing votong period");
         shares[voter] = newShares;
         emit SharesUpdated(voter, newShares);
     }
@@ -192,6 +192,17 @@ function createProposal(
         voted[proposalId][msg.sender] = true;
 
         emit VoteCast(proposalId, msg.sender, voteWeight, voteFor);
+
+        if (checkQuorum(proposalId)) {
+            Proposal storage proposal = proposals[proposalId];
+            proposal.active = false;
+            bool passed = proposal.votesFor > proposal.votesAgainst;
+            proposalOutcomes[proposalId] = ProposalOutcome({
+                passed: passed,
+                votesFor: proposal.votesFor,
+                votesAgainst: proposal.votesAgainst
+            });
+        }
     }
 
 event ProposalDeleted(uint256 indexed proposalId);
@@ -210,5 +221,35 @@ event ProposalDeleted(uint256 indexed proposalId);
     // check if proposal is active
     function isProposalActive(uint256 proposalId) public view returns (bool) {
         return proposals[proposalId].active;
+    }   
+    // this is for real time voting
+    function getProposalVotes(uint256 proposalId) public view returns (uint256 votesFor, uint256 votesAgainst, bool active) {
+        require(proposalId < proposals.length, "Invalid proposal ID");
+        Proposal storage proposal = proposals[proposalId];
+        return (proposal.votesFor, proposal.votesAgainst, proposal.active);
     }
+
+    // set voting period to active and non active
+    function setVotingPeriod(bool active, uint256 durationInMinutes) public onlyAdmin {
+        isVotingPeriodActive = active;
+        votingEndTime = block.timestamp + (durationInMinutes * 1 minutes);
+    }
+
+    // make sure that when the quorum is met, the proposal is passed
+    function checkQuorum(uint256 proposalId) public view returns (bool) {
+        Proposal storage proposal = proposals[proposalId];
+        uint256 totalVotes = proposal.votesFor + proposal.votesAgainst;
+        uint256 quorum;
+        if (proposal.quorumType == uint8(QuorumType.SimpleMajority)) {
+            quorum = totalVotes / 2;
+        } else if (proposal.quorumType == uint8(QuorumType.TwoThirds)) {
+            quorum = (totalVotes * 2) / 3;
+        } else if (proposal.quorumType == uint8(QuorumType.ThreeQuarters)) {
+            quorum = (totalVotes * 3) / 4;
+        } else if (proposal.quorumType == uint8(QuorumType.Unanimous)) {
+            quorum = totalVotes;
+        }
+        return proposal.votesFor > quorum;
+    }
+
 }
