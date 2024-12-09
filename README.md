@@ -31,7 +31,6 @@ Develop a **Decentralized Voting System** where the voting power of each partici
 
 ✔️ 8. Shareholder Rewards for Voting
 Reward shareholders with tokens for participating in votes (e.g., governance tokens or reputation points).
-Role-Based Admin Controls
 
 ✔️ 9. Implement roles for managing proposals and elections:
      Admins: Can manage voting events.
