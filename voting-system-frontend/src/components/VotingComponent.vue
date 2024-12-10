@@ -41,6 +41,8 @@ export default {
   },
   mounted() {
 
+    this.fetchProposals();
+
     const adminAddress = deployedAddress.address;
     this.checkIfAdmin(adminAddress);
 
