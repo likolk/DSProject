@@ -4,8 +4,9 @@
     <div v-for="history in votingHistory" :key="history.proposalId" class="history-card">
       <h4>{{ history.title }}</h4>
       <p><strong>Description:</strong> {{ history.description }}</p>
-      <p><strong>Outcome:</strong> 
-        <span :class="{'passed': history.outcome === 'Passed', 'failed': history.outcome === 'Failed', 'ongoing': history.outcome === 'Ongoing'}">
+      <p><strong>Outcome:</strong>
+        <span
+          :class="{ 'passed': history.outcome === 'Passed', 'failed': history.outcome === 'Failed', 'ongoing': history.outcome === 'Ongoing' }">
           {{ history.outcome }}
         </span>
       </p>
@@ -43,7 +44,6 @@ export default {
       const accounts = await this.web3.eth.getAccounts();
       this.account = accounts[0];
       this.contract = this.getVotingContract();
-      // this.fetchVotingHistory();
     },
 
     async fetchVotingHistory() {
@@ -61,8 +61,8 @@ export default {
             outcome: proposal.active
               ? "Ongoing"
               : outcome.passed
-              ? "Passed"
-              : "Failed",
+                ? "Passed"
+                : "Failed",
             votesFor: outcome.votesFor,
             votesAgainst: outcome.votesAgainst,
             startTime: new Date(proposal.votingEndTime * 1000 - proposal.votingEndTime * 60000).toLocaleString(),

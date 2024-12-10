@@ -13,7 +13,7 @@
       </div>
       <div class="vote-buttons">
         <button @click="vote(proposal.id, 'yes')" :disabled="proposal.voted" class="vote-button yes">Yes</button>
-<button @click="vote(proposal.id, 'no')" :disabled="proposal.voted" class="vote-button no">No</button>
+        <button @click="vote(proposal.id, 'no')" :disabled="proposal.voted" class="vote-button no">No</button>
         <button @click="deleteProposal(proposal.id)" class="delete-button" v-if="checkIfAdmin">Delete</button>
       </div>
       <div class="vote-status">
@@ -55,7 +55,6 @@ export default {
       eventBus.on("newProposalCreated", this.fetchProposals);
       this.contract.on("ProposalDeleted", this.handleProposalDeleted);
 
-      // real-time voting updates
       this.contract.on("ProposalCreated", (proposalId, title, description) => {
         console.log(`New Proposal Created! ProposalId: ${proposalId}, Title: ${title}, Description: ${description}`);
         this.fetchProposals();
@@ -82,7 +81,6 @@ export default {
     });
   },
   beforeDestroy() {
-    // remove event listeners
     if (this.contract) {
       eventBus.off("newProposalCreated", this.fetchProposals);
       this.contract.off("ProposalDeleted", this.handleProposalDeleted);

@@ -8,7 +8,6 @@ const app = express();
 
 app.use(express.json());
 
-// Routes
 app.post("/registerVoter", registerVoterController);
 app.get("/proposal/:proposalId/votes", getProposalVotesController);
 
