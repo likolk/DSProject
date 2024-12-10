@@ -53,6 +53,13 @@ For the frontend: cd voting-system-frontend -> npm run serve
 
 For the local ETH network: cd voting-system-smart-contracts -> npx hardhat node
 
-For compiling and deploying the contracts, we used Remix IDE.
+For compiling and deploying the contracts, we used Remix IDE (look section below)
+
+## Using REMIX IDE to compile and deploy the contracts
+As mentioned previously, we use Remix IDE in order to compile and deploy the contracts. Specifically we will be using 2 files for this, test.sol and smartContract.sol.
+In particular, we load those 2 files in Remix, and start off with compiling test.sol using 0.8.26 Solidity version. Upon successful compilation, we make sure to deploy it. We do this by first of all setting up Metamask, adding a localhost network by choosing a network name, the URL (http://127.0.0.1:8545/), the Chain ID (31337) and ETH as currency sumbol. Then we proceed by adding at least an account in our metamask. For this we will be using local hardhat network which provides us with 20 accounts (Addresses and PKs). We simply select some accounts and add them in the Metamask localhost network. Then we proceed in the Remix IDE by selecting the "Injected Provider - Metamask" environment, set 100 ETH as deployment transaction cost of the test contract, and deploy it. Upon successful deployment, we compile the smartContract.sol file, and try to deploy it by setting 1000 ETH as deployment transaction cost. The addresses we will pass will be the addresses of the admins in our metamask configuration, and the tokenaddress will be the deployment address of the test contract. We deploy and upon deployment is successful, we see that we are presented with all the method our smartContract.sol file has in order to interact with the smart contract (i.e. createProposal, addAdmin, etc). Make sure you send some ETH for the transactions that are payable (the transactions that require sending some ETHs for it to be successful).
+
+
+
 
 Pro Tip: Make sure you do npm install in every separate directory to install the required dependencies.
