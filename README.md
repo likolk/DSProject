@@ -38,7 +38,7 @@ Reward shareholders with tokens for participating in votes (e.g., governance tok
 
 ✔️ 10. Transparency with Anonymity:
      Display aggregated voting results while maintaining the privacy of individual voters.
-     This is implemented in the sense that we do not track any personal information about the voters and their votes, but we only map each user to their wallet address in order to perform the voting and ensure that they can vote only once for a certain proposal.
+     This is implemented in the sense that we do not track any personal information about the voters (such as names, age, position in the company, etc) and their votes, but we only map each user to their wallet address in order to perform the voting and ensure that they can vote only once for a certain proposal.
 
 
 
