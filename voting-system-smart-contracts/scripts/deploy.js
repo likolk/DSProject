@@ -15,7 +15,6 @@ async function main() {
 
     try {
         const votingContract = await VotingContract.deploy(initialAdmins, tokenAddress,{
-            // send 1 ether along with the deployment transaction
             value: ethers.parseEther("1")
           }
         );
@@ -26,7 +25,6 @@ async function main() {
 
         const deployedAddressPath = path.join(__dirname, "deployedAddress.json");
 
-        // Save as an object with "address" key
         fs.writeFileSync(deployedAddressPath, JSON.stringify({ address: contractAddress }, null, 2));
         console.log("Contract address saved to deployedAddress.json");
 

@@ -40,34 +40,34 @@ export default {
   },
   methods: {
     async connectWallet() {
-  console.log("Connecting wallet...");
-  if (window.ethereum) {
-    console.log("Ethereum is available.");
-    try {
-      this.web3 = new Web3(window.ethereum);
-      console.log("Web3 initialized:", this.web3);
-      console.log("Current provider:", this.web3.currentProvider);
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      console.log("Connected accounts:", accounts);
-      this.accounts = accounts;
-      const selectedAccount = accounts[0];
-      console.log("Selected account:", selectedAccount);
-      this.selectedAccount = selectedAccount;
+      console.log("Connecting wallet...");
+      if (window.ethereum) {
+        console.log("Ethereum is available.");
+        try {
+          this.web3 = new Web3(window.ethereum);
+          console.log("Web3 initialized:", this.web3);
+          console.log("Current provider:", this.web3.currentProvider);
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          console.log("Connected accounts:", accounts);
+          this.accounts = accounts;
+          const selectedAccount = accounts[0];
+          console.log("Selected account:", selectedAccount);
+          this.selectedAccount = selectedAccount;
 
-      await this.selectAccountWithBalance();
+          await this.selectAccountWithBalance();
 
-      const contractAddress = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
-      this.contract = new this.web3.eth.Contract(votingAbi.abi, contractAddress);
-      console.log("Contract initialized:", this.contract);
-    } catch (err) {
-      console.error("Error connecting wallet:", err);
-      this.errorMessage = "Please connect your Ethereum wallet.";
+          const contractAddress = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
+          this.contract = new this.web3.eth.Contract(votingAbi.abi, contractAddress);
+          console.log("Contract initialized:", this.contract);
+        } catch (err) {
+          console.error("Error connecting wallet:", err);
+          this.errorMessage = "Please connect your Ethereum wallet.";
+        }
+      } else {
+        alert("Ethereum wallet not found.");
+      }
     }
-  } else {
-    alert("Ethereum wallet not found.");
-  }
-}
-,
+    ,
 
     async hasSufficientBalance(account) {
       try {
@@ -81,7 +81,6 @@ export default {
       }
     },
 
-    // Try to select an account with sufficient balance
     async selectAccountWithBalance() {
       for (let i = 0; i < this.accounts.length; i++) {
         const account = this.accounts[i];
@@ -93,22 +92,20 @@ export default {
           return;
         }
       }
-
-      // If no account with sufficient balance is found
       this.errorMessage = "No account with sufficient balance found. Please ensure at least one account has enough funds.";
       console.log(this.errorMessage);
     },
 
     async registerShareholder() {
       if (this.shares > 100) {
-  this.errorMessage = "You cannot register with more than 100 shares.";
-  console.log("Shares exceed limit:", this.shares);
-  return;
-}
+        this.errorMessage = "You cannot register with more than 100 shares.";
+        console.log("Shares exceed limit:", this.shares);
+        return;
+      }
 
 
       console.log("Registering shareholder...");
-      this.shares = Number(this.shares); 
+      this.shares = Number(this.shares);
       console.log("Shares value:", this.shares);
 
       if (!this.shares || this.shares <= 0) {
@@ -132,18 +129,17 @@ export default {
       console.log("Using account:", this.selectedAccount);
 
       try {
-        const valueInWei = this.web3.utils.toWei('0.5', 'ether'); 
+        const valueInWei = this.web3.utils.toWei('0.5', 'ether');
 
-        // Register shareholder
         const tx = await this.contract.methods.registerShareholder(this.selectedAccount, this.shares).send({
           from: this.selectedAccount,
-          value: valueInWei, 
+          value: valueInWei,
         });
 
         console.log("Transaction sent:", tx);
         alert("Registration successful!");
-        this.shares = "";  
-        this.errorMessage = "";  
+        this.shares = "";
+        this.errorMessage = "";
       } catch (err) {
         console.error("Registration failed:", err);
         this.errorMessage = `Registration failed. Error: ${err.message || 'Unknown error'}`;
@@ -158,7 +154,7 @@ export default {
     async fetchTokens() {
       try {
         const tokens = await this.contract.methods.getTokens(this.selectedAccount).call();
-        this.tokens = tokens; 
+        this.tokens = tokens;
         console.log("Tokens available for voting:", this.tokens);
       } catch (err) {
         console.error("Error fetching tokens:", err);
